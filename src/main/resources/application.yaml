@@ -15,7 +15,6 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     open-in-view: false
 
-authorization:
-  tokens:
-    tokenValidityTime: 600
-    refreshTokenValidity: 3600
+logging:
+  level:
+    org.springframework.security: DEBUG

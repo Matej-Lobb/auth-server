@@ -57,7 +57,7 @@ public class UserService {
         return usersRepository.findById(id);
     }
 
-    public void createUser(User user, Role role) throws ConflictException {
+    public User createUser(User user, Role role) throws ConflictException {
         log.info("Creating user " + user.getUsername());
         checkIfUserExists(user);
 
@@ -69,7 +69,7 @@ public class UserService {
         Set<Role> roles = new HashSet<>();
         roles.add(Role.builder().role(role.getRole()).build());
         user.setRoles(roles);
-        User savedUser = usersRepository.save(user);
+        return usersRepository.save(user);
     }
 
     public User updateUserById(long id, User newUser) throws NotFoundException {
