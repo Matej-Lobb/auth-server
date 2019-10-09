@@ -39,7 +39,7 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        log.info("Getting all users from database.");
+        log.debug("Getting all users from database.");
         return usersRepository.findAll();
     }
 

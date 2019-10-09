@@ -4,9 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import sk.mlobb.authserver.model.User;
+import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.UserService;
 
 import java.util.List;
@@ -15,17 +18,20 @@ import java.util.List;
 @RestController
 public class UserController {
 
+    private final RestAuthenticationHandler restAuthenticationHandler;
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(RestAuthenticationHandler restAuthenticationHandler, UserService userService) {
+        this.restAuthenticationHandler = restAuthenticationHandler;
         this.userService = userService;
     }
 
+    @Secured("ADMIN")
     @GetMapping(value = "/users/all",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getAllUsers() {
-        log.debug("Getting all users");
+        restAuthenticationHandler.checkAccess();
         final List<User> users = userService.getAllUsers();
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -33,31 +39,25 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    //TODO
-//
-//    /**
-//     * Gets user by name.
-//     *
-//     * @param username the username
-//     * @return the user by name
-//     */
-//    @RequestMapping(value = {"/user/data/{username}"}, method = RequestMethod.GET,
-//            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-//    public ResponseEntity<?> getUserByName(@PathVariable("username") String username) {
-//        LOG.info("Get user with username " + username);
-//        final boolean authorized = ScaffoldRestUtils.checkAuthorization(username);
-//        if (authorized) {
-//            if (EmailUtils.isValidEmailAddress(username)) {
-//                return getUser(userService.findByEmail(username));
-//            } else {
-//                return getUser(userService.findByUsername(username));
-//            }
-//        }
-//        return new ResponseEntity<>(new ErrorResponse()
-//                .setError(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-//                .setError_description("You don't have correct access right for this call"), HttpStatus.UNAUTHORIZED);
-//    }
-//
+
+    @GetMapping(value = {"/users/{identifier}"},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> getUserByName(@PathVariable("identifier") String identifier) {
+        if (restAuthenticationHandler.isAdminAccess()) {
+            return getUser(userService.getUserByName(identifier));
+        } else {
+            final User userFromContext = restAuthenticationHandler.getUserFromContext();
+            if (userFromContext.getUsername().equals(identifier)) {
+                return getUser(userService.getUserByName(identifier));
+            }
+            if (userFromContext.getEmail().equals(identifier)) {
+                return getUser(userService.getUserByName(identifier));
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
 //    /**
 //     * Gets user by id.
 //     *
@@ -157,13 +157,12 @@ public class UserController {
 //        userService.deleteUserById(user.getId());
 //        return new ResponseEntity<>(HttpStatus.OK);
 //    }
-//
-//    private ResponseEntity<?> getUser(User user) {
-//        if (user == null) {
-//            LOG.info("User not found");
-//            return new ResponseEntity<>(new ErrorResponse().setError(HttpStatus.NOT_FOUND.getReasonPhrase())
-//                    .setError_description("User not found"), HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(user, HttpStatus.OK);
-//    }
+
+    private ResponseEntity<?> getUser(User user) {
+        if (user == null) {
+            log.debug("User not found");
+            return ResponseEntity.notFound().build();
+        }
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 }

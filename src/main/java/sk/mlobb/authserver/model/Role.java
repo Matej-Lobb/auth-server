@@ -27,4 +27,7 @@ public class Role {
 
     @Column(name="role")
     private String role;
+
+    @Column(name="super_access")
+    private Boolean superAccess;
 }

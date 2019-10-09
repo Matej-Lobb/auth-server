@@ -3,7 +3,7 @@ package sk.mlobb.authserver.model.exception;
 /**
  * The type Invalid request exception.
  */
-public class InvalidRequestException extends Exception {
+public class InvalidRequestException extends RuntimeException {
 
     /**
      * Instantiates a new Invalid request exception.

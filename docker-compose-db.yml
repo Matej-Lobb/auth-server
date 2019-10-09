@@ -1,0 +1,20 @@
+version: '3.3'
+
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'auth-manager'
+      MYSQL_USER: 'auth-manager'
+      MYSQL_PASSWORD: '091320f82ca9b5306548d221e7be52aaa8259fb4840458f2379e2b742518adea'
+      MYSQL_ROOT_PASSWORD: '5f21ff3453c7f774e2a899c43f31bf7f3fd3df4dd95c51c3f8450775a43a148f'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - my-db
+
+volumes:
+  my-db:

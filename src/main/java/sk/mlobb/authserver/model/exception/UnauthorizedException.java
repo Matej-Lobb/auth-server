@@ -3,7 +3,7 @@ package sk.mlobb.authserver.model.exception;
 /**
  * The type Unauthorized exception.
  */
-public class UnauthorizedException extends Exception {
+public class UnauthorizedException extends RuntimeException {
 
     /**
      * Instantiates a new Unauthorized exception.

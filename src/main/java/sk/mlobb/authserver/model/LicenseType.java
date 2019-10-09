@@ -22,7 +22,7 @@ public class LicenseType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="license_id")
+    @Column(name="id")
     private Long id;
 
     @Column(name="type")

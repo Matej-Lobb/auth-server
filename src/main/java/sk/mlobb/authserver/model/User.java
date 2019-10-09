@@ -63,7 +63,7 @@ public class User {
     private String country;
 
     @Lob
-    @Basic(fetch = FetchType.EAGER)
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "profile_picture")
     private byte[] profilePicture;
 
