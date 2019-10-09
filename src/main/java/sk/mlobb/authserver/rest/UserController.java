@@ -1,12 +1,10 @@
 package sk.mlobb.authserver.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.service.UserService;
@@ -14,7 +12,7 @@ import sk.mlobb.authserver.service.UserService;
 import java.util.List;
 
 @Slf4j
-@RestController("/api")
+@RestController
 public class UserController {
 
     private final UserService userService;
@@ -34,6 +32,8 @@ public class UserController {
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
+
+    //TODO
 //
 //    /**
 //     * Gets user by name.

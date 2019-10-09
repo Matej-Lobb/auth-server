@@ -26,14 +26,11 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Configure the token store and authentication manager
     @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
         endpoints.tokenStore(tokenStore()).authenticationManager(authenticationManager);
     }
 
-    // Configure a client store. In-memory for simplicity, but consider other
-    // options for real apps.
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
