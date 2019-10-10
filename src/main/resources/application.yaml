@@ -13,6 +13,9 @@ spring:
     change-log: classpath:/db/liquibase-changelog.xml
     enabled: true
 
+server:
+  port: 9090
+
 logging:
   level:
     org.springframework.security: DEBUG

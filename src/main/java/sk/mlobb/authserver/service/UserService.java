@@ -12,13 +12,13 @@ import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.exception.ConflictException;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.rest.CreateUserRequest;
+import sk.mlobb.authserver.model.rest.UpdateUserRequest;
 import sk.mlobb.authserver.service.mappers.UserMapper;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -44,14 +44,12 @@ public class UserService {
     public List<User> getAllUsers(String applicationUid) {
         log.debug("Getting all users from database.");
         final Application application = applicationService.getByUid(applicationUid);
-        if (application == null) {
-            throw new NotFoundException("Application not exists !");
-        }
+        validateObject(application == null, "Application not exists !");
         return usersRepository.findAllByApplication(application);
     }
 
     public User getUserByName(String identifier) throws NotFoundException {
-        log.info("Get user by identifier: {}", identifier);
+        log.debug("Get user by identifier: {}", identifier);
         if (isValidEmailAddress(identifier)) {
             return getUser(usersRepository.findByEmailIgnoreCase(identifier));
         } else {
@@ -60,11 +58,8 @@ public class UserService {
     }
 
     public User getUserByName(String applicationUid, String identifier) throws NotFoundException {
-        log.info("Get user by identifier: {}", identifier);
-        final Application application = applicationService.getByUid(applicationUid);
-        if (application == null) {
-            throw new NotFoundException("Application not exists !");
-        }
+        log.debug("Get user by identifier: {}", identifier);
+        checkIfApplicationExists(applicationUid);
         if (isValidEmailAddress(identifier)) {
             return getUser(usersRepository.findByEmailIgnoreCase(identifier));
         } else {
@@ -73,15 +68,13 @@ public class UserService {
     }
 
     public User createUser(String applicationUid, CreateUserRequest createUserRequest) throws ConflictException {
-        log.info("Creating user " + createUserRequest.getUsername());
-        checkIfUserExists(createUserRequest.getUsername(), createUserRequest.getEmail());
+        log.debug("Creating user: {}", createUserRequest.getUsername());
+        validateObject(createUserRequest.getUsername(), createUserRequest.getEmail());
 
         final Application application = applicationService.getByUid(applicationUid);
-        if (application == null) {
-            throw new NotFoundException("Application not exists !");
-        }
+        validateObject(application == null, "Application not exists !");
 
-        return createUser(userMapper.mapUser(createUserRequest, application), application.getDefaultUserRole());
+        return createUser(userMapper.mapCreateUser(createUserRequest, application), application.getDefaultUserRole());
     }
 
     private User createUser(User user, Role role) throws ConflictException {
@@ -93,34 +86,50 @@ public class UserService {
         return user;
     }
 
-    public User updateUserById(long id, User newUser) throws NotFoundException {
-        log.info("Updating user with id " + id);
-        Optional<User> oldUser = usersRepository.findById(id);
-        if (oldUser.isPresent()) {
-            User updatedUser = mapUpdateRequestToUser(oldUser.get(), newUser);
-            return usersRepository.save(updatedUser);
-        }
-        throw new NotFoundException(USER_NOT_FOUND);
+    public User updateUserByUsername(String applicationUid, String existingUsername,
+                                     UpdateUserRequest updateUserRequest)
+            throws NotFoundException {
+        log.debug("Updating user with username: {} ", existingUsername);
+
+        Application application = checkIfApplicationExists(applicationUid);
+
+        final User oldUser = usersRepository.findByUsernameIgnoreCase(existingUsername);
+        validateObject(oldUser == null, USER_NOT_FOUND);
+
+        User newUser = userMapper.mapUpdateUser(updateUserRequest, application);
+
+        final User updatedUser = mapUpdateRequestToUser(oldUser, newUser);
+        return usersRepository.save(updatedUser);
     }
 
-    public void deleteUserById(long id) throws NotFoundException {
-        log.info("Deleting User with id " + id);
-        Optional<User> user = usersRepository.findById(id);
-        if (user.isPresent()) {
-            usersRepository.deleteById(user.get().getId());
-            return;
+    public void deleteUserByUsername(String applicationUid, String username) throws NotFoundException {
+        log.debug("Deleting User with username {}", username);
+
+        checkIfApplicationExists(applicationUid);
+
+        User user = usersRepository.findByUsernameIgnoreCase(username);
+        validateObject(user == null, USER_NOT_FOUND);
+        usersRepository.deleteById(user.getId());
+    }
+
+    private void validateObject(boolean exists, String userNotFound) {
+        if (exists) {
+            throw new NotFoundException(userNotFound);
         }
-        throw new NotFoundException(USER_NOT_FOUND);
+    }
+
+    private Application checkIfApplicationExists(String applicationUid) {
+        final Application application = applicationService.getByUid(applicationUid);
+        validateObject(application == null, "Application not exists !");
+        return application;
     }
 
     private User getUser(User user) throws NotFoundException {
-        if (user == null) {
-            throw new NotFoundException(USER_NOT_FOUND);
-        }
+        validateObject(user == null, USER_NOT_FOUND);
         return user;
     }
 
-    private void checkIfUserExists(String requestUsername, String requestEmail) throws ConflictException {
+    private void validateObject(String requestUsername, String requestEmail) throws ConflictException {
         boolean username = usersRepository.findByUsernameIgnoreCase(requestUsername) != null;
         if (username) {
             throw new ConflictException(String.format("A user with name %s already exist", requestUsername));
@@ -155,9 +164,6 @@ public class UserService {
         }
         if (!StringUtils.isEmpty(newUser.getPassword()) && !oldUser.getPassword().equals(newUser.getPassword())) {
             oldUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-        }
-        if (newUser.getRoles() != null && !newUser.getRoles().isEmpty()) {
-            oldUser.setRoles(newUser.getRoles());
         }
         return oldUser;
     }
