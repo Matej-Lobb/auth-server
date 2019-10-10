@@ -1,17 +1,23 @@
 package sk.mlobb.authserver.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 import sk.mlobb.authserver.model.User;
+import sk.mlobb.authserver.model.rest.CreateUserRequest;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -27,12 +33,12 @@ public class UserController {
     }
 
     @Secured("ADMIN")
-    @GetMapping(value = "/users/all",
+    @GetMapping(value = "/applications/{applicationUid}/users/all",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(@PathVariable("applicationUid") String applicationUid) {
         restAuthenticationHandler.checkAccess();
-        final List<User> users = userService.getAllUsers();
+        final List<User> users = userService.getAllUsers(applicationUid);
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -40,72 +46,39 @@ public class UserController {
     }
 
 
-    @GetMapping(value = {"/users/{identifier}"},
+    @GetMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getUserByName(@PathVariable("identifier") String identifier) {
+    public ResponseEntity<?> getUserByName(@PathVariable("applicationUid") String applicationUid,
+                                           @PathVariable("identifier") String identifier) {
         if (restAuthenticationHandler.isAdminAccess()) {
-            return getUser(userService.getUserByName(identifier));
+            return getUser(userService.getUserByName(applicationUid, identifier));
         } else {
+            // Allow only self User Data not others
             final User userFromContext = restAuthenticationHandler.getUserFromContext();
             if (userFromContext.getUsername().equals(identifier)) {
-                return getUser(userService.getUserByName(identifier));
+                return getUser(userService.getUserByName(applicationUid, identifier));
             }
             if (userFromContext.getEmail().equals(identifier)) {
-                return getUser(userService.getUserByName(identifier));
+                return getUser(userService.getUserByName(applicationUid, identifier));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
-//    /**
-//     * Gets user by id.
-//     *
-//     * @param id the id
-//     * @return the user by id
-//     */
-//    @RequestMapping(value = {"/user/data/id/{id}"}, method = RequestMethod.GET,
-//            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-//    public ResponseEntity<?> getUserById(@PathVariable("id") long id) {
-//        LOG.info("Get user with id " + id);
-//        final User user = userService.findById(id);
-//        if (user == null) {
-//            LOG.info("Unable to get user. User not found");
-//            return new ResponseEntity<>(new ErrorResponse().setError(HttpStatus.NOT_FOUND.getReasonPhrase())
-//                    .setError_description("Unable to get user. User not found"), HttpStatus.NOT_FOUND);
-//        }
-//        final boolean authorized = ScaffoldRestUtils.checkAuthorization(user.getUsername());
-//        if (authorized) {
-//            return getUser(user);
-//        }
-//        return new ResponseEntity<>(new ErrorResponse()
-//                .setError(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-//                .setError_description("You don't have correct access right for this call"), HttpStatus.UNAUTHORIZED);
-//    }
-//
-//    /**
-//     * Create user response entity.
-//     *
-//     * @param user      the user
-//     * @param ucBuilder the uc builder
-//     * @return the response entity
-//     */
-//    @RequestMapping(value = {"/user/create"}, method = RequestMethod.POST)
-//    public ResponseEntity<?> createUser(@RequestBody User user, UriComponentsBuilder ucBuilder) {
-//        LOG.info("Creating user " + user.getUsername());
-//        if (userService.isUserExist(user)) {
-//            LOG.info("A user with name " + user.getUsername() + " already exist");
-//            return new ResponseEntity<>(new ErrorResponse()
-//                    .setError(HttpStatus.CONFLICT.getReasonPhrase())
-//                    .setError_description("A user with name " + user.getUsername() + " already exist"),
-//                    HttpStatus.CONFLICT);
-//        }
-//        userService.saveUser(user);
-//        final HttpHeaders headers = new HttpHeaders();
-//        headers.setLocation(ucBuilder.path("/user/{id}").buildAndExpand(user.getId()).toUri());
-//        return new ResponseEntity<>(headers, HttpStatus.CREATED);
-//    }
-//
+    @PostMapping(value = {"/applications/{applicationId}/users/create"},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> createUser(@PathVariable("applicationId") String applicationId,
+                                        @Valid @RequestBody CreateUserRequest request, UriComponentsBuilder ucBuilder) {
+        log.info("Creating user " + request.getUsername());
+        final User dbUser = userService.createUser(applicationId, request);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(ucBuilder.path("/applications/{applicationUid}/users/{identifier}")
+                .buildAndExpand(dbUser.getApplication().getId(), dbUser.getUsername()).toUri());
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+    }
+
 //    /**
 //     * Update user by id response entity.
 //     *

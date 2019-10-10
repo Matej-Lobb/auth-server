@@ -35,10 +35,6 @@ public class LicenseService {
         return licensesRepository.findByLicense(hash);
     }
 
-    public License getLicenseByUserId(long userId) {
-        return licensesRepository.findByUserId(userId);
-    }
-
     public License generate(LicenseType licenseType, String username) throws NotFoundException {
         final String encodedLicense = passwordEncoder.encode(getLicenseInput(licenseType, username));
         final String extractedRawLicense = extractLicense(encodedLicense);
@@ -46,7 +42,6 @@ public class LicenseService {
         return License.builder()
                 .license(license)
                 .licenseType(licenseType)
-                .user(userService.getUserByName(username))
                 .build();
     }
 

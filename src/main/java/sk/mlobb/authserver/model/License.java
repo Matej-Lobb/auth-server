@@ -30,11 +30,7 @@ public class License {
     @Column(name = "license")
     private String license;
 
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = LicenseType.class)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = LicenseType.class)
     @JoinColumn(name = "license_type_id", nullable = false)
     private LicenseType licenseType;
-
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
 }

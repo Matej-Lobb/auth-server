@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.mlobb.authserver.db.UsersRepository;
-import sk.mlobb.authserver.db.UsersRolesRepository;
+import sk.mlobb.authserver.model.Application;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
-import sk.mlobb.authserver.model.UserRoles;
 import sk.mlobb.authserver.model.exception.ConflictException;
 import sk.mlobb.authserver.model.exception.NotFoundException;
+import sk.mlobb.authserver.model.rest.CreateUserRequest;
+import sk.mlobb.authserver.service.mappers.UserMapper;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -26,21 +27,27 @@ public class UserService {
 
     private static final String USER_NOT_FOUND = "User not found";
 
-    private final UsersRolesRepository usersRolesRepository;
+    private final ApplicationService applicationService;
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserService(UsersRepository usersRepository, UsersRolesRepository usersRolesRepository,
-                       PasswordEncoder passwordEncoder) {
-        this.usersRolesRepository = usersRolesRepository;
+    public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder,
+                       ApplicationService applicationService, UserMapper userMapper) {
+        this.applicationService = applicationService;
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(String applicationUid) {
         log.debug("Getting all users from database.");
-        return usersRepository.findAll();
+        final Application application = applicationService.getByUid(applicationUid);
+        if (application == null) {
+            throw new NotFoundException("Application not exists !");
+        }
+        return usersRepository.findAllByApplication(application);
     }
 
     public User getUserByName(String identifier) throws NotFoundException {
@@ -52,24 +59,38 @@ public class UserService {
         }
     }
 
-    public Optional<User> getUserById(long id) {
-        log.info("Get user with id " + id);
-        return usersRepository.findById(id);
+    public User getUserByName(String applicationUid, String identifier) throws NotFoundException {
+        log.info("Get user by identifier: {}", identifier);
+        final Application application = applicationService.getByUid(applicationUid);
+        if (application == null) {
+            throw new NotFoundException("Application not exists !");
+        }
+        if (isValidEmailAddress(identifier)) {
+            return getUser(usersRepository.findByEmailIgnoreCase(identifier));
+        } else {
+            return getUser(usersRepository.findByUsernameIgnoreCase(identifier));
+        }
     }
 
-    public User createUser(User user, Role role) throws ConflictException {
-        log.info("Creating user " + user.getUsername());
-        checkIfUserExists(user);
+    public User createUser(String applicationUid, CreateUserRequest createUserRequest) throws ConflictException {
+        log.info("Creating user " + createUserRequest.getUsername());
+        checkIfUserExists(createUserRequest.getUsername(), createUserRequest.getEmail());
 
+        final Application application = applicationService.getByUid(applicationUid);
+        if (application == null) {
+            throw new NotFoundException("Application not exists !");
+        }
+
+        return createUser(userMapper.mapUser(createUserRequest, application), application.getDefaultUserRole());
+    }
+
+    private User createUser(User user, Role role) throws ConflictException {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user = usersRepository.save(user);
-
-        usersRolesRepository.save(UserRoles.builder().userId(user.getId()).userRoleId(role.getId()).build());
-
         Set<Role> roles = new HashSet<>();
-        roles.add(Role.builder().role(role.getRole()).build());
+        roles.add(role);
         user.setRoles(roles);
-        return usersRepository.save(user);
+        user = usersRepository.save(user);
+        return user;
     }
 
     public User updateUserById(long id, User newUser) throws NotFoundException {
@@ -99,14 +120,14 @@ public class UserService {
         return user;
     }
 
-    private void checkIfUserExists(User user) throws ConflictException {
-        boolean username = usersRepository.findByUsernameIgnoreCase(user.getUsername()) != null;
+    private void checkIfUserExists(String requestUsername, String requestEmail) throws ConflictException {
+        boolean username = usersRepository.findByUsernameIgnoreCase(requestUsername) != null;
         if (username) {
-            throw new ConflictException("A user with name " + user.getUsername() + " already exist");
+            throw new ConflictException(String.format("A user with name %s already exist", requestUsername));
         }
-        boolean email = usersRepository.findByEmailIgnoreCase(user.getEmail()) != null;
+        boolean email = usersRepository.findByEmailIgnoreCase(requestEmail) != null;
         if (email) {
-            throw new ConflictException("A user with email " + user.getEmail() + " already exist");
+            throw new ConflictException(String.format("A user with email %s already exist", requestEmail));
         }
     }
 
@@ -120,19 +141,19 @@ public class UserService {
         if (newUser.getDateOfBirth() != null) {
             oldUser.setDateOfBirth(newUser.getDateOfBirth());
         }
-        if (! StringUtils.isEmpty(newUser.getCountry())) {
+        if (!StringUtils.isEmpty(newUser.getCountry())) {
             oldUser.setCountry(newUser.getCountry());
         }
-        if (! StringUtils.isEmpty(newUser.getEmail())) {
+        if (!StringUtils.isEmpty(newUser.getEmail())) {
             oldUser.setEmail(newUser.getEmail());
         }
-        if (! StringUtils.isEmpty(newUser.getFirstName())) {
+        if (!StringUtils.isEmpty(newUser.getFirstName())) {
             oldUser.setFirstName(newUser.getFirstName());
         }
-        if (! StringUtils.isEmpty(newUser.getLastName())) {
+        if (!StringUtils.isEmpty(newUser.getLastName())) {
             oldUser.setLastName(newUser.getLastName());
         }
-        if (! StringUtils.isEmpty(newUser.getPassword()) && !oldUser.getPassword().equals(newUser.getPassword())) {
+        if (!StringUtils.isEmpty(newUser.getPassword()) && !oldUser.getPassword().equals(newUser.getPassword())) {
             oldUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         }
         if (newUser.getRoles() != null && !newUser.getRoles().isEmpty()) {

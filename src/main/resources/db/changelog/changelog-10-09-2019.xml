@@ -143,7 +143,6 @@
         </insert>
 
         <insert tableName="users">
-            <column name="id" valueNumeric="1"/>
             <column name="username" value="lobor"/>
             <column name="last_name" value="Admin"/>
             <column name="first_name" value="Admin"/>
@@ -178,14 +177,7 @@
             <column name="license_type_id" type="BIGINT">
                 <constraints nullable="true" />
             </column>
-            <column name="user_id" type="BIGINT">
-                <constraints nullable="true" />
-            </column>
         </createTable>
-
-        <addForeignKeyConstraint baseTableName="licenses"
-                                 baseColumnNames="user_id" constraintName="fk_licenses_user_id"
-                                 referencedColumnNames="id" referencedTableName="users" />
 
         <addForeignKeyConstraint baseTableName="licenses"
                                  baseColumnNames="license_type_id" constraintName="fk_licenses_license_type_id"
@@ -207,8 +199,11 @@
 
         <insert tableName="licenses">
             <column name="license" value="ASDA-123AS-3123ASD-1234"/>
-            <column name="user_id" valueNumeric="1"/>
             <column name="license_type_id" valueNumeric="1"/>
         </insert>
+
+        <sql>
+            UPDATE users SET license_id = 1 where id = 1;
+        </sql>
     </changeSet>
 </databaseChangeLog>

@@ -8,5 +8,4 @@ import sk.mlobb.authserver.model.License;
 public interface LicensesRepository extends JpaRepository<License, Long> {
 
     License findByLicense(String hash);
-    License findByUserId(long userId);
 }
