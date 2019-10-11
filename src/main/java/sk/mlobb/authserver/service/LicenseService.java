@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.mlobb.authserver.db.LicensesRepository;
 import sk.mlobb.authserver.model.License;
-import sk.mlobb.authserver.model.LicenseType;
+import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 
 import java.util.List;
@@ -17,14 +17,11 @@ public class LicenseService {
 
     private final LicensesRepository licensesRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserService userService;
 
     @Autowired
-    public LicenseService(PasswordEncoder passwordEncoder, LicensesRepository licensesRepository,
-                          UserService userService) {
+    public LicenseService(PasswordEncoder passwordEncoder, LicensesRepository licensesRepository) {
         this.licensesRepository = licensesRepository;
         this.passwordEncoder = passwordEncoder;
-        this.userService = userService;
     }
 
     public List<License> getAllLicenses() {
@@ -35,13 +32,13 @@ public class LicenseService {
         return licensesRepository.findByLicense(hash);
     }
 
-    public License generate(LicenseType licenseType, String username) throws NotFoundException {
-        final String encodedLicense = passwordEncoder.encode(getLicenseInput(licenseType, username));
+    public License generate(Role role, String username) throws NotFoundException {
+        final String encodedLicense = passwordEncoder.encode(getLicenseInput(role, username));
         final String extractedRawLicense = extractLicense(encodedLicense);
         final String license = splitEncodedLicense(extractedRawLicense);
         return License.builder()
                 .license(license)
-                .licenseType(licenseType)
+                .role(role)
                 .build();
     }
 
@@ -66,7 +63,7 @@ public class LicenseService {
         return rawLicenseBuilder.toString();
     }
 
-    private String getLicenseInput(LicenseType licenseType, String username) {
-        return String.format("%s-%s", licenseType.getType(), username);
+    private String getLicenseInput(Role role, String username) {
+        return String.format("%s-%s", role.getRole(), username);
     }
 }

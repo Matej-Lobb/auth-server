@@ -51,6 +51,10 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
             }
         }
 
+        if (Boolean.FALSE.equals(user.getActive())) {
+            throw new UsernameNotFoundException(String.format("User %s is not active !", identification));
+        }
+
         final String providedUserIdentification = authentication.getName();
         final Object providedUserPassword = authentication.getCredentials();
 

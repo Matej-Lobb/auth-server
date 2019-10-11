@@ -9,12 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import sk.mlobb.authserver.model.Application;
-import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.ApplicationService;
-import sk.mlobb.authserver.service.UserService;
 
-import javax.websocket.server.PathParam;
 import java.util.List;
 
 @Slf4j

@@ -5,12 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import sk.mlobb.authserver.model.License;
-import sk.mlobb.authserver.model.Role;
-
-import javax.validation.constraints.Email;
 import java.time.LocalDate;
-import java.util.Set;
 
 @Getter
 @Setter

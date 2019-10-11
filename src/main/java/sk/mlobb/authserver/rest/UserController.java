@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @Secured("ADMIN")
-    @GetMapping(value = "/applications/{applicationUid}/users/all",
+    @GetMapping(value = "/applications/{applicationUid}/users",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> getAllUsers(@PathVariable("applicationUid") String applicationUid) {
@@ -69,7 +69,7 @@ public class UserController {
         }
     }
 
-    @PostMapping(value = {"/applications/{applicationUid}/users/create"},
+    @PostMapping(value = {"/applications/{applicationUid}/users"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> createUser(@PathVariable("applicationUid") String applicationUid,
@@ -103,8 +103,8 @@ public class UserController {
     @DeleteMapping(value = {"/applications/{applicationUid}/users/{username}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> deleteUserById(@PathVariable("applicationUid") String applicationUid,
-                                            @PathVariable("username") String username) {
+    public ResponseEntity<?> deleteUserByName(@PathVariable("applicationUid") String applicationUid,
+                                              @PathVariable("username") String username) {
         if (restAuthenticationHandler.isAdminAccess()) {
             userService.deleteUserByUsername(applicationUid, username);
         } else {
@@ -115,7 +115,6 @@ public class UserController {
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        userService.deleteUserByUsername(applicationUid, username);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

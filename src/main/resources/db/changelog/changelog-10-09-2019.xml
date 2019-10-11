@@ -158,15 +158,6 @@
             <column name="user_id" valueNumeric="1"/>
         </insert>
 
-        <createTable tableName="license_types">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true"/>
-            </column>
-            <column name="type" type="varchar(80)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
         <createTable tableName="licenses">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
@@ -174,14 +165,14 @@
             <column name="license" type="varchar(80)">
                 <constraints nullable="false"/>
             </column>
-            <column name="license_type_id" type="BIGINT">
+            <column name="role_id" type="BIGINT">
                 <constraints nullable="true" />
             </column>
         </createTable>
 
         <addForeignKeyConstraint baseTableName="licenses"
-                                 baseColumnNames="license_type_id" constraintName="fk_licenses_license_type_id"
-                                 referencedColumnNames="id" referencedTableName="license_types" />
+                                 baseColumnNames="role_id" constraintName="fk_licenses_role_id"
+                                 referencedColumnNames="role_id" referencedTableName="roles" />
 
         <addColumn tableName="users">
             <column name="license_id" type="BIGINT">
@@ -193,13 +184,9 @@
                                  baseColumnNames="license_id" constraintName="fk_users_licenses_license_id"
                                  referencedColumnNames="id" referencedTableName="licenses" />
 
-        <insert tableName="license_types">
-            <column name="type" value="ADMIN"/>
-        </insert>
-
         <insert tableName="licenses">
             <column name="license" value="ASDA-123AS-3123ASD-1234"/>
-            <column name="license_type_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="1"/>
         </insert>
 
         <sql>
