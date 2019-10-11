@@ -39,7 +39,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         sh '''
-            docker-compose -f docker-compose-db.yml down --remove-orphans
+            docker-compose -f docker-compose-db.yml down --remove-orphans || true
         '''
       }
     }
