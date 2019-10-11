@@ -39,15 +39,14 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         sh '''
-          docker build -t mlobb/auth-server:${BUILD_NUMBER} .
+            docker-compose -f docker-compose-db.yml down --remove-orphans
         '''
       }
     }
     stage('Publish Docker Image') {
       steps {
         sh '''
-          docker stop auth-server || true && docker rm -f auth-server || true
-          docker run -d -p 9090:9090 --name auth-server --rm mlobb/auth-server:${BUILD_NUMBER}
+            docker-compose -f docker-compose-db.yml up
         '''
       }
     }

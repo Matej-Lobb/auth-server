@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/auth-manager
+    url: jdbc:mysql://db.mlobb.sk:3306/auth-manager?requireSSL=true&useSSL=true
     driverClassName: com.mysql.cj.jdbc.Driver
     username: auth-manager
     password: 091320f82ca9b5306548d221e7be52aaa8259fb4840458f2379e2b742518adea
