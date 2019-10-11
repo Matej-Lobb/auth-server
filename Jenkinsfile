@@ -46,7 +46,7 @@ pipeline {
     stage('Publish Docker Image') {
       steps {
         sh '''
-            docker-compose -f docker-compose-db.yml up
+            docker-compose -f docker-compose-db.yml up -d
         '''
       }
     }
