@@ -112,8 +112,9 @@ public class UserController {
             final User userFromContext = restAuthenticationHandler.getUserFromContext();
             if (userFromContext.getUsername().equals(username)) {
                 userService.deleteUserByUsername(applicationUid, username);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }

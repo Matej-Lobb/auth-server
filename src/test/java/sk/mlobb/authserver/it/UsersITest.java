@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AuthServerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class UsersIT {
+public class UsersITest {
 
     private static final String APPLICATION_UID = "1s2a1x";
 
@@ -37,7 +38,6 @@ public class UsersIT {
 
     @Test
     public void testUsersFlow() {
-
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         when(authentication.getPrincipal()).thenReturn("test");
@@ -54,22 +54,23 @@ public class UsersIT {
                 .username("test")
                 .build();
 
+        log.info("Creating user: {}", createUserRequest.toString());
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
         ResponseEntity<?> createUserResponse = userController.createUser(APPLICATION_UID, createUserRequest,
                 uriComponentsBuilder);
-
+        log.info("Response: {}", createUserResponse);
         Assert.assertEquals(HttpStatus.CREATED, createUserResponse.getStatusCode());
 
+        log.info("Getting user: {}", createUserRequest.getUsername());
         ResponseEntity<?> getUserResponse = userController.getUserByName(APPLICATION_UID,
                 createUserRequest.getUsername());
+        log.info("Response: {}", getUserResponse);
 
         Assert.assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
         User user = (User) getUserResponse.getBody();
         Assert.assertNotNull(user);
 
-        ResponseEntity<?> allUsersResponse = userController.getAllUsers(APPLICATION_UID);
-        Assert.assertEquals(HttpStatus.UNAUTHORIZED, allUsersResponse.getStatusCode());
-
+        log.info("Updating user: {}", user.getUsername());
         ResponseEntity<?> updateUserResponse = userController.updateUserByUsername(APPLICATION_UID, user.getUsername(),
                 UpdateUserRequest.builder()
                         .active(true)
@@ -79,21 +80,32 @@ public class UsersIT {
                         .lastName("new")
                         .keepUpdated(false)
                         .build());
+        log.info("Response: {}", updateUserResponse);
 
         Assert.assertEquals(HttpStatus.OK, updateUserResponse.getStatusCode());
-        user = (User) getUserResponse.getBody();
+        user = (User) updateUserResponse.getBody();
         Assert.assertNotNull(user);
         Assert.assertEquals("new", user.getCountry());
         Assert.assertEquals("new@new.sk", user.getEmail());
         Assert.assertEquals("new", user.getFirstName());
         Assert.assertEquals("new", user.getLastName());
+        Assert.assertFalse(user.getKeepUpdated());
         Assert.assertNotNull(user.getPassword());
 
+        log.info("Deleting user: {}", user.getUsername());
         ResponseEntity<?> deleteUserResponse = userController.deleteUserByName(APPLICATION_UID, user.getUsername());
         Assert.assertEquals(HttpStatus.OK, deleteUserResponse.getStatusCode());
+        log.info("Response: {}", deleteUserResponse);
 
-        getUserResponse = userController.getUserByName(APPLICATION_UID, user.getUsername());
-
-        Assert.assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
+        try {
+            log.info("Getting user: {}", user.getUsername());
+            userController.getUserByName(APPLICATION_UID, user.getUsername());
+        } catch (Exception exception) {
+            if (exception instanceof UsernameNotFoundException) {
+                Assert.assertEquals("User not exist in current context!", exception.getMessage());
+            } else {
+                Assert.fail();
+            }
+        }
     }
 }

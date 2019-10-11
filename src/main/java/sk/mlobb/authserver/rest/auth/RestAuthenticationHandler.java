@@ -2,7 +2,6 @@ package sk.mlobb.authserver.rest.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,8 +11,6 @@ import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.service.UserService;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,45 +28,32 @@ public class RestAuthenticationHandler {
         this.userService = userService;
     }
 
+
     /**
      * Check access with Reflections
      *
      * This will only work if file Name contains 'Controller' in name
      */
     public void checkAccess() {
-//        TODO
-//        StackTraceElement controller = getController();
-//        Constructor<?> constructor = getClassName(controller).getConstructors()[0];
-//        int parameterCount = constructor.getParameterCount();
-//        List<Object> objects = new ArrayList<>();
-//        for (int i = 0; i == parameterCount; i++) {
-//            objects.add(null);
-//        }
-//        Object object;
-//        try {
-//            object = constructor.newInstance(objects.toArray());
-//        } catch (Exception e) {
-//            throw new UsernameNotFoundException("No access to resource !");
-//        }
-//
-//        final Method[] methods = object.getClass().getDeclaredMethods();
-//        for (Method method : methods) {
-//            if (method.getName().equalsIgnoreCase(controller.getMethodName()) &&
-//                    method.isAnnotationPresent(Secured.class)) {
-//                boolean authenticated = false;
-//                for (Role role : getUserFromContext().getRoles()) {
-//                    for (String annotationValue : method.getAnnotation(Secured.class).value()) {
-//                        if (role.getRole().equalsIgnoreCase(annotationValue)) {
-//                            authenticated = true;
-//                            break;
-//                        }
-//                    }
-//                }
-//                if (!authenticated) {
-//                    throw new UsernameNotFoundException("No access to resource !");
-//                }
-//            }
-//        }
+        StackTraceElement controller = getController();
+        final Method[] methods = getClassName(controller).getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.getName().equalsIgnoreCase(controller.getMethodName()) &&
+                    method.isAnnotationPresent(Secured.class)) {
+                boolean authenticated = false;
+                for (Role role : getUserFromContext().getRoles()) {
+                    for (String annotationValue : method.getAnnotation(Secured.class).value()) {
+                        if (role.getRole().equalsIgnoreCase(annotationValue)) {
+                            authenticated = true;
+                            break;
+                        }
+                    }
+                }
+                if (!authenticated) {
+                    throw new UsernameNotFoundException("No access to resource !");
+                }
+            }
+        }
     }
 
     public boolean isAdminAccess() {
