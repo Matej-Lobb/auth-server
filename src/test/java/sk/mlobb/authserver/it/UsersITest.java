@@ -17,8 +17,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
 import sk.mlobb.authserver.app.AuthServerApplication;
 import sk.mlobb.authserver.model.User;
-import sk.mlobb.authserver.model.rest.CreateUserRequest;
-import sk.mlobb.authserver.model.rest.UpdateUserRequest;
+import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
+import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
+import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
+import sk.mlobb.authserver.model.rest.response.CheckUserExistenceResponse;
 import sk.mlobb.authserver.rest.UserController;
 
 import java.time.LocalDate;
@@ -91,6 +93,16 @@ public class UsersITest {
         Assert.assertEquals("new", user.getLastName());
         Assert.assertFalse(user.getKeepUpdated());
         Assert.assertNotNull(user.getPassword());
+
+        ResponseEntity<?> checkUserDataResponse = userController.checkUserDataExistence(APPLICATION_UID,
+                CheckUserExistenceRequest.builder().username("test").email("new@new.sk").build());
+
+        Assert.assertEquals(HttpStatus.OK, checkUserDataResponse.getStatusCode());
+        CheckUserExistenceResponse checkUserExistenceResponse = (CheckUserExistenceResponse)
+                checkUserDataResponse.getBody();
+        Assert.assertNotNull(checkUserExistenceResponse);
+        Assert.assertFalse(checkUserExistenceResponse.getEmailIsUnique());
+        Assert.assertFalse(checkUserExistenceResponse.getUsernameIsUnique());
 
         log.info("Deleting user: {}", user.getUsername());
         ResponseEntity<?> deleteUserResponse = userController.deleteUserByName(APPLICATION_UID, user.getUsername());

@@ -3,6 +3,7 @@ package sk.mlobb.authserver.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.mlobb.authserver.db.UsersRepository;
@@ -11,8 +12,10 @@ import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.exception.ConflictException;
 import sk.mlobb.authserver.model.exception.NotFoundException;
-import sk.mlobb.authserver.model.rest.CreateUserRequest;
-import sk.mlobb.authserver.model.rest.UpdateUserRequest;
+import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
+import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
+import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
+import sk.mlobb.authserver.model.rest.response.CheckUserExistenceResponse;
 import sk.mlobb.authserver.service.mappers.UserMapper;
 
 import javax.mail.internet.AddressException;
@@ -57,6 +60,39 @@ public class UserService {
         }
     }
 
+    public CheckUserExistenceResponse checkUserDataExistence(String applicationUid,
+                                                             CheckUserExistenceRequest checkUserExistenceRequest) {
+        checkIfApplicationExists(applicationUid);
+
+        log.debug("Checking user data existence: {}", checkUserExistenceRequest);
+        CheckUserExistenceResponse checkUserExistenceResponse = new CheckUserExistenceResponse();
+        if (!StringUtils.isEmpty(checkUserExistenceRequest.getUsername())) {
+            try {
+                User user = getUserByName(applicationUid, checkUserExistenceRequest.getUsername());
+                if (user != null) {
+                    checkUserExistenceResponse.setUsernameIsUnique(false);
+                } else {
+                    checkUserExistenceResponse.setUsernameIsUnique(true);
+                }
+            } catch (Exception exception) {
+                checkUserExistenceResponse.setUsernameIsUnique(true);
+            }
+        }
+        if (!StringUtils.isEmpty(checkUserExistenceRequest.getEmail())) {
+            try {
+                User user = getUserByName(applicationUid, checkUserExistenceRequest.getEmail());
+                if (user != null) {
+                    checkUserExistenceResponse.setEmailIsUnique(false);
+                } else {
+                    checkUserExistenceResponse.setEmailIsUnique(true);
+                }
+            } catch (Exception exception) {
+                checkUserExistenceResponse.setEmailIsUnique(true);
+            }
+        }
+        return checkUserExistenceResponse;
+    }
+
     public User getUserByName(String applicationUid, String identifier) throws NotFoundException {
         log.debug("Get user by identifier: {}", identifier);
         checkIfApplicationExists(applicationUid);
@@ -87,8 +123,7 @@ public class UserService {
     }
 
     public User updateUserByUsername(String applicationUid, String existingUsername,
-                                     UpdateUserRequest updateUserRequest)
-            throws NotFoundException {
+                                     UpdateUserRequest updateUserRequest) throws NotFoundException {
         log.debug("Updating user with username: {} ", existingUsername);
 
         Application application = checkIfApplicationExists(applicationUid);

@@ -1,6 +1,7 @@
 package sk.mlobb.authserver.rest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import sk.mlobb.authserver.model.User;
-import sk.mlobb.authserver.model.rest.CreateUserRequest;
-import sk.mlobb.authserver.model.rest.UpdateUserRequest;
+import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
+import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
+import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
+import sk.mlobb.authserver.model.rest.response.CheckUserExistenceResponse;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.UserService;
 
@@ -48,6 +51,13 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @PostMapping(value = {"/applications/{applicationUid}/users/check"},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public ResponseEntity<?> checkUserDataExistence(@PathVariable("applicationUid") String applicationUid,
+                                           @Valid @RequestBody CheckUserExistenceRequest checkUserExistenceRequest) {
+        return ResponseEntity.ok(userService.checkUserDataExistence(applicationUid, checkUserExistenceRequest));
+    }
 
     @GetMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
@@ -87,7 +97,7 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<?> updateUserByUsername(@PathVariable("applicationUid") String applicationUid,
                                                   @PathVariable("username") String username,
-                                                  @RequestBody UpdateUserRequest updateUserRequest) {
+                                                  @Valid @RequestBody UpdateUserRequest updateUserRequest) {
         if (restAuthenticationHandler.isAdminAccess()) {
             return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest));
         } else {

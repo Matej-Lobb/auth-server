@@ -4,8 +4,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import sk.mlobb.authserver.model.Application;
 import sk.mlobb.authserver.model.User;
-import sk.mlobb.authserver.model.rest.CreateUserRequest;
-import sk.mlobb.authserver.model.rest.UpdateUserRequest;
+import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
+import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {

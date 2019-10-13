@@ -46,4 +46,6 @@ public class Application {
     @JsonManagedReference
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "application", cascade = CascadeType.ALL)
     private List<User> users;
+
+    //TODO serviceUsers applicationRoles
 }
