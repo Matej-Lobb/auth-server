@@ -5,6 +5,7 @@ pipeline {
   }
   environment {
     CODACY_PROJECT_TOKEN = '1343680a8be749e799f91f1297d359ed'
+    CODECOV_TOKEN = 'ea8c7c98-fb26-441c-b9bc-b767ff8a7deb'
   }
   stages {
     stage('Initialize') {
@@ -34,6 +35,11 @@ pipeline {
         chmod +x codacy-coverage-reporter
         ./codacy-coverage-reporter report -l Java -r target/site/jacoco/jacoco.xml
         '''
+      }
+    }
+    stage('Codecov') {
+      steps {
+        sh 'curl -s https://codecov.io/bash | bash -s'
       }
     }
     stage('Remove Docker Image') {
