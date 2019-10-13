@@ -5,9 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import sk.mlobb.authserver.db.ApplicationUsersRepository;
 import sk.mlobb.authserver.db.UsersRepository;
-import sk.mlobb.authserver.db.UsersRolesRepository;
+import sk.mlobb.authserver.db.UserRolesRepository;
 import sk.mlobb.authserver.model.Application;
+import sk.mlobb.authserver.model.ApplicationUser;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.exception.ConflictException;
@@ -21,7 +23,6 @@ import sk.mlobb.authserver.service.mappers.UserMapper;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -31,7 +32,8 @@ public class UserService {
     private static final String APPLICATION_NOT_EXISTS = "Application not exists !";
     private static final String USER_NOT_FOUND = "User not found";
 
-    private final UsersRolesRepository usersRolesRepository;
+    private final ApplicationUsersRepository applicationUsersRepository;
+    private final UserRolesRepository userRolesRepository;
     private final ApplicationService applicationService;
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
@@ -40,28 +42,19 @@ public class UserService {
     @Autowired
     public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder,
                        ApplicationService applicationService, UserMapper userMapper,
-                       UsersRolesRepository usersRolesRepository) {
-        this.usersRolesRepository = usersRolesRepository;
+                       UserRolesRepository userRolesRepository, ApplicationUsersRepository applicationUsersRepository) {
+        this.applicationUsersRepository = applicationUsersRepository;
+        this.userRolesRepository = userRolesRepository;
         this.applicationService = applicationService;
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
 
-    public List<User> getAllUsers(String applicationUid) {
+    public Set<User> getAllUsers(String applicationUid) {
         log.debug("Getting all users from database.");
-        final Application application = applicationService.getByUid(applicationUid);
-        validateObject(application == null, "Application not exists !");
-        return usersRepository.findAllByApplication(application);
-    }
-
-    public User getUserByName(String identifier) {
-        log.debug("Get user by identifier: {}", identifier);
-        if (isValidEmailAddress(identifier)) {
-            return getUser(usersRepository.findByEmailIgnoreCase(identifier));
-        } else {
-            return getUser(usersRepository.findByUsernameIgnoreCase(identifier));
-        }
+        Application application = checkIfApplicationExists(applicationUid);
+        return application.getUsers();
     }
 
     public CheckUserExistenceResponse checkUserDataExistence(String applicationUid,
@@ -91,7 +84,10 @@ public class UserService {
 
     public User getUserByName(String applicationUid, String identifier) {
         log.debug("Get user by identifier: {}", identifier);
-        checkIfApplicationExists(applicationUid);
+
+        Application application = checkIfApplicationExists(applicationUid);
+        checkIfUserIsPartOfApplication(application, identifier);
+
         if (isValidEmailAddress(identifier)) {
             return getUser(usersRepository.findByEmailIgnoreCase(identifier));
         } else {
@@ -101,20 +97,22 @@ public class UserService {
 
     public User createUser(String applicationUid, CreateUserRequest createUserRequest) {
         log.debug("Creating user: {}", createUserRequest.getUsername());
-        validateObject(createUserRequest.getUsername(), createUserRequest.getEmail());
 
-        final Application application = applicationService.getByUid(applicationUid);
-        validateObject(application == null, "Application not exists !");
+        validateUserData(createUserRequest.getUsername(), createUserRequest.getEmail());
+        Application application = checkIfApplicationExists(applicationUid);
 
-        return createUser(userMapper.mapCreateUser(createUserRequest, application), application.getDefaultUserRole());
+        return createUser(userMapper.mapCreateUser(createUserRequest, application), application);
     }
 
-    private User createUser(User user, Role role) {
+    private User createUser(User user, Application application) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Set<Role> roles = new HashSet<>();
-        roles.add(role);
+        roles.add(application.getDefaultUserRole());
         user.setRoles(roles);
-        return usersRepository.save(user);
+        User dbUser = usersRepository.save(user);
+        applicationUsersRepository.save(ApplicationUser.builder().applicationId(application.getId())
+                .userId(dbUser.getId()).build());
+        return dbUser;
     }
 
     // TODO Update Roles / License
@@ -123,9 +121,10 @@ public class UserService {
         log.debug("Updating user with username: {} ", existingUsername);
 
         Application application = checkIfApplicationExists(applicationUid);
+        checkIfUserIsPartOfApplication(application, existingUsername);
 
         final User oldUser = usersRepository.findByUsernameIgnoreCase(existingUsername);
-        validateObject(oldUser == null, USER_NOT_FOUND);
+        validateIfObjectExists(oldUser == null, USER_NOT_FOUND);
 
         User newUser = userMapper.mapUpdateUser(updateUserRequest, application);
 
@@ -136,15 +135,27 @@ public class UserService {
     public void deleteUserByUsername(String applicationUid, String username) {
         log.debug("Deleting User with username {}", username);
 
-        checkIfApplicationExists(applicationUid);
+        Application application = checkIfApplicationExists(applicationUid);
+        checkIfUserIsPartOfApplication(application, username);
 
         User user = usersRepository.findByUsernameIgnoreCase(username);
-        validateObject(user == null, USER_NOT_FOUND);
-        usersRolesRepository.deleteById(user.getId());
+        validateIfObjectExists(user == null, USER_NOT_FOUND);
+
+        applicationUsersRepository.deleteByUserId(user.getId());
+        userRolesRepository.deleteById(user.getId());
         usersRepository.deleteById(user.getId());
     }
 
-    private void validateObject(boolean exists, String userNotFound) {
+    public User getUserByName(String identifier) {
+        log.debug("Get user by identifier: {}", identifier);
+        if (isValidEmailAddress(identifier)) {
+            return getUser(usersRepository.findByEmailIgnoreCase(identifier));
+        } else {
+            return getUser(usersRepository.findByUsernameIgnoreCase(identifier));
+        }
+    }
+
+    private void validateIfObjectExists(boolean exists, String userNotFound) {
         if (exists) {
             throw new NotFoundException(userNotFound);
         }
@@ -152,16 +163,32 @@ public class UserService {
 
     private Application checkIfApplicationExists(String applicationUid) {
         final Application application = applicationService.getByUid(applicationUid);
-        validateObject(application == null, APPLICATION_NOT_EXISTS);
+        validateIfObjectExists(application == null, APPLICATION_NOT_EXISTS);
         return application;
     }
 
+    private void checkIfUserIsPartOfApplication(Application application, String identifier) {
+        Set<User> users = application.getUsers();
+        User dbUser = getUserByName(identifier);
+
+        boolean isInCorrectApplication = false;
+        for (User user : users) {
+            if (user.getId().equals(dbUser.getId())) {
+                isInCorrectApplication = true;
+                break;
+            }
+        }
+        if (! isInCorrectApplication) {
+            throw new NotFoundException("User not found in current application !");
+        }
+    }
+
     private User getUser(User user) {
-        validateObject(user == null, USER_NOT_FOUND);
+        validateIfObjectExists(user == null, USER_NOT_FOUND);
         return user;
     }
 
-    private void validateObject(String requestUsername, String requestEmail) {
+    private void validateUserData(String requestUsername, String requestEmail) {
         boolean username = usersRepository.findByUsernameIgnoreCase(requestUsername) != null;
         if (username) {
             throw new ConflictException(String.format("A user with name %s already exist", requestUsername));

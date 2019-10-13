@@ -17,12 +17,12 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Entity
 @Table(name = "user_roles")
-public class UserRoles implements Serializable {
+public class UserRole implements Serializable {
 
     @Id
     @Column(name = "user_id")
-    private long userId;
+    private Long userId;
 
     @Column(name = "role_id")
-    private long userRoleId;
+    private Long userRoleId;
 }

@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  auth-server:
+    container_name: auth-server
+    build: .
+    ports:
+      - '9090:9090'
+    volumes:
+      - auth
+
+volumes:
+  auth: {}

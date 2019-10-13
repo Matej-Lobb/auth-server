@@ -48,7 +48,7 @@ pipeline {
       }
       steps {
         sh '''
-            docker-compose -f docker-compose-db.yml down --remove-orphans || true
+            docker-compose down --remove-orphans || true
         '''
       }
     }
@@ -58,7 +58,7 @@ pipeline {
       }
       steps {
         sh '''
-            docker-compose -f docker-compose-db.yml up -d --build
+            docker-compose up -d --build
         '''
       }
     }

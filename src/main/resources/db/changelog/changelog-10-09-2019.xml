@@ -70,10 +70,10 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="first_name" type="varchar(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="last_name" type="varchar(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="username" type="varchar(255)">
                 <constraints nullable="false"/>
@@ -82,13 +82,13 @@
                 <constraints nullable="false"/>
             </column>
             <column name="keep_updated" type="BOOLEAN">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="country" type="varchar(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="dob" type="DATE">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="password" type="varchar(255)">
                 <constraints nullable="false"/>
@@ -141,6 +141,10 @@
             <column name="role_id" valueNumeric="6"/>
             <column name="role" value="ENTERPRISE"/>
         </insert>
+        <insert tableName="roles">
+            <column name="role_id" valueNumeric="7"/>
+            <column name="role" value="SERVICE"/>
+        </insert>
 
         <insert tableName="users">
             <column name="username" value="lobor"/>
@@ -153,6 +157,7 @@
             <column name="password" value="$2a$06$aYrCcyuS/NMuActk7fwFZO0UZ2sBkg3KfswBWtfnIIKYlzxX5nJB."/>
             <column name="dob" valueDate="1992-08-07"/>
         </insert>
+
         <insert tableName="user_roles">
             <column name="role_id" valueNumeric="1"/>
             <column name="user_id" valueNumeric="1"/>

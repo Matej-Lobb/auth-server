@@ -22,7 +22,7 @@ import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.UserService;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -42,7 +42,7 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity getAllUsers(@PathVariable("applicationUid") String applicationUid) {
         restAuthenticationHandler.checkAccess();
-        final List<User> users = userService.getAllUsers(applicationUid);
+        final Set<User> users = userService.getAllUsers(applicationUid);
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -86,7 +86,7 @@ public class UserController {
         final User dbUser = userService.createUser(applicationUid, request);
         final HttpHeaders headers = new HttpHeaders();
         headers.setLocation(ucBuilder.path("/applications/{applicationUid}/users/{identifier}")
-                .buildAndExpand(dbUser.getApplication().getId(), dbUser.getUsername()).toUri());
+                .buildAndExpand(applicationUid, dbUser.getUsername()).toUri());
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
