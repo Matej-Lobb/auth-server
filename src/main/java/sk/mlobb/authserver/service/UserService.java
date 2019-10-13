@@ -3,10 +3,10 @@ package sk.mlobb.authserver.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.mlobb.authserver.db.UsersRepository;
+import sk.mlobb.authserver.db.UsersRolesRepository;
 import sk.mlobb.authserver.model.Application;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
@@ -30,6 +30,7 @@ public class UserService {
 
     private static final String USER_NOT_FOUND = "User not found";
 
+    private final UsersRolesRepository usersRolesRepository;
     private final ApplicationService applicationService;
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
@@ -37,7 +38,9 @@ public class UserService {
 
     @Autowired
     public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder,
-                       ApplicationService applicationService, UserMapper userMapper) {
+                       ApplicationService applicationService, UserMapper userMapper,
+                       UsersRolesRepository usersRolesRepository) {
+        this.usersRolesRepository = usersRolesRepository;
         this.applicationService = applicationService;
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
@@ -122,6 +125,7 @@ public class UserService {
         return user;
     }
 
+    // TODO Update Roles / License
     public User updateUserByUsername(String applicationUid, String existingUsername,
                                      UpdateUserRequest updateUserRequest) throws NotFoundException {
         log.debug("Updating user with username: {} ", existingUsername);
@@ -144,6 +148,7 @@ public class UserService {
 
         User user = usersRepository.findByUsernameIgnoreCase(username);
         validateObject(user == null, USER_NOT_FOUND);
+        usersRolesRepository.deleteById(user.getId());
         usersRepository.deleteById(user.getId());
     }
 
