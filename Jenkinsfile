@@ -36,17 +36,17 @@ pipeline {
         '''
       }
     }
-    stage('Build Docker Image') {
+    stage('Remove Docker Image') {
       steps {
         sh '''
             docker-compose -f docker-compose-db.yml down --remove-orphans || true
         '''
       }
     }
-    stage('Publish Docker Image') {
+    stage('Build and Publish Docker Image') {
       steps {
         sh '''
-            docker-compose -f docker-compose-db.yml up -d
+            docker-compose -f docker-compose-db.yml up -d --build
         '''
       }
     }
