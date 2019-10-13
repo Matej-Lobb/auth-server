@@ -31,7 +31,7 @@ public class ApplicationController {
     @GetMapping(value = "/applications/all",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity getAllUsers() {
         restAuthenticationHandler.checkAccess();
         final List<Application> applications = applicationService.getAll();
         if (applications.isEmpty()) {
@@ -44,7 +44,7 @@ public class ApplicationController {
     @GetMapping(value = "/applications/{uid}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getByName(@PathVariable("uid") String uid) {
+    public ResponseEntity getByName(@PathVariable("uid") String uid) {
         restAuthenticationHandler.checkAccess();
         final Application applications = applicationService.getByUid(uid);
         if (applications == null) {

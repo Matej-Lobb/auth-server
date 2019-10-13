@@ -1,7 +1,6 @@
 package sk.mlobb.authserver.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +18,6 @@ import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
-import sk.mlobb.authserver.model.rest.response.CheckUserExistenceResponse;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.UserService;
 
@@ -42,7 +40,7 @@ public class UserController {
     @GetMapping(value = "/applications/{applicationUid}/users",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getAllUsers(@PathVariable("applicationUid") String applicationUid) {
+    public ResponseEntity getAllUsers(@PathVariable("applicationUid") String applicationUid) {
         restAuthenticationHandler.checkAccess();
         final List<User> users = userService.getAllUsers(applicationUid);
         if (users.isEmpty()) {
@@ -54,7 +52,7 @@ public class UserController {
     @PostMapping(value = {"/applications/{applicationUid}/users/check"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> checkUserDataExistence(@PathVariable("applicationUid") String applicationUid,
+    public ResponseEntity checkUserDataExistence(@PathVariable("applicationUid") String applicationUid,
                                            @Valid @RequestBody CheckUserExistenceRequest checkUserExistenceRequest) {
         return ResponseEntity.ok(userService.checkUserDataExistence(applicationUid, checkUserExistenceRequest));
     }
@@ -62,7 +60,7 @@ public class UserController {
     @GetMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> getUserByName(@PathVariable("applicationUid") String applicationUid,
+    public ResponseEntity getUserByName(@PathVariable("applicationUid") String applicationUid,
                                            @PathVariable("identifier") String identifier) {
         if (restAuthenticationHandler.isAdminAccess()) {
             return getUser(userService.getUserByName(applicationUid, identifier));
@@ -82,7 +80,7 @@ public class UserController {
     @PostMapping(value = {"/applications/{applicationUid}/users"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> createUser(@PathVariable("applicationUid") String applicationUid,
+    public ResponseEntity createUser(@PathVariable("applicationUid") String applicationUid,
                                         @Valid @RequestBody CreateUserRequest request, UriComponentsBuilder ucBuilder) {
         log.info("Creating user " + request.getUsername());
         final User dbUser = userService.createUser(applicationUid, request);
@@ -95,7 +93,7 @@ public class UserController {
     @PutMapping(value = {"/applications/{applicationUid}/users/{username}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> updateUserByUsername(@PathVariable("applicationUid") String applicationUid,
+    public ResponseEntity updateUserByUsername(@PathVariable("applicationUid") String applicationUid,
                                                   @PathVariable("username") String username,
                                                   @Valid @RequestBody UpdateUserRequest updateUserRequest) {
         if (restAuthenticationHandler.isAdminAccess()) {
@@ -113,7 +111,7 @@ public class UserController {
     @DeleteMapping(value = {"/applications/{applicationUid}/users/{username}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<?> deleteUserByName(@PathVariable("applicationUid") String applicationUid,
+    public ResponseEntity deleteUserByName(@PathVariable("applicationUid") String applicationUid,
                                               @PathVariable("username") String username) {
         if (restAuthenticationHandler.isAdminAccess()) {
             userService.deleteUserByUsername(applicationUid, username);
@@ -129,7 +127,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private ResponseEntity<?> getUser(User user) {
+    private ResponseEntity getUser(User user) {
         if (user == null) {
             log.debug("User not found");
             return ResponseEntity.notFound().build();

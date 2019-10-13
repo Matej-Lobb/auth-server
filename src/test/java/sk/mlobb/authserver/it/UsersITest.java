@@ -112,12 +112,10 @@ public class UsersITest {
         try {
             log.info("Getting user: {}", user.getUsername());
             userController.getUserByName(APPLICATION_UID, user.getUsername());
-        } catch (Exception exception) {
-            if (exception instanceof UsernameNotFoundException) {
-                Assert.assertEquals("User not exist in current context!", exception.getMessage());
-            } else {
-                Assert.fail();
-            }
+        } catch (UsernameNotFoundException exception) {
+            Assert.assertEquals("User not exist in current context!", exception.getMessage());
+            return;
         }
+        Assert.fail();
     }
 }

@@ -28,6 +28,7 @@ import java.util.Set;
 @Service
 public class UserService {
 
+    private static final String APPLICATION_NOT_EXISTS = "Application not exists !";
     private static final String USER_NOT_FOUND = "User not found";
 
     private final UsersRolesRepository usersRolesRepository;
@@ -54,7 +55,7 @@ public class UserService {
         return usersRepository.findAllByApplication(application);
     }
 
-    public User getUserByName(String identifier) throws NotFoundException {
+    public User getUserByName(String identifier) {
         log.debug("Get user by identifier: {}", identifier);
         if (isValidEmailAddress(identifier)) {
             return getUser(usersRepository.findByEmailIgnoreCase(identifier));
@@ -72,11 +73,7 @@ public class UserService {
         if (!StringUtils.isEmpty(checkUserExistenceRequest.getUsername())) {
             try {
                 User user = getUserByName(applicationUid, checkUserExistenceRequest.getUsername());
-                if (user != null) {
-                    checkUserExistenceResponse.setUsernameIsUnique(false);
-                } else {
-                    checkUserExistenceResponse.setUsernameIsUnique(true);
-                }
+                checkUserExistenceResponse.setUsernameIsUnique(user == null);
             } catch (Exception exception) {
                 checkUserExistenceResponse.setUsernameIsUnique(true);
             }
@@ -84,11 +81,7 @@ public class UserService {
         if (!StringUtils.isEmpty(checkUserExistenceRequest.getEmail())) {
             try {
                 User user = getUserByName(applicationUid, checkUserExistenceRequest.getEmail());
-                if (user != null) {
-                    checkUserExistenceResponse.setEmailIsUnique(false);
-                } else {
-                    checkUserExistenceResponse.setEmailIsUnique(true);
-                }
+                checkUserExistenceResponse.setEmailIsUnique(user == null);
             } catch (Exception exception) {
                 checkUserExistenceResponse.setEmailIsUnique(true);
             }
@@ -96,7 +89,7 @@ public class UserService {
         return checkUserExistenceResponse;
     }
 
-    public User getUserByName(String applicationUid, String identifier) throws NotFoundException {
+    public User getUserByName(String applicationUid, String identifier) {
         log.debug("Get user by identifier: {}", identifier);
         checkIfApplicationExists(applicationUid);
         if (isValidEmailAddress(identifier)) {
@@ -106,7 +99,7 @@ public class UserService {
         }
     }
 
-    public User createUser(String applicationUid, CreateUserRequest createUserRequest) throws ConflictException {
+    public User createUser(String applicationUid, CreateUserRequest createUserRequest) {
         log.debug("Creating user: {}", createUserRequest.getUsername());
         validateObject(createUserRequest.getUsername(), createUserRequest.getEmail());
 
@@ -116,18 +109,17 @@ public class UserService {
         return createUser(userMapper.mapCreateUser(createUserRequest, application), application.getDefaultUserRole());
     }
 
-    private User createUser(User user, Role role) throws ConflictException {
+    private User createUser(User user, Role role) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Set<Role> roles = new HashSet<>();
         roles.add(role);
         user.setRoles(roles);
-        user = usersRepository.save(user);
-        return user;
+        return usersRepository.save(user);
     }
 
     // TODO Update Roles / License
     public User updateUserByUsername(String applicationUid, String existingUsername,
-                                     UpdateUserRequest updateUserRequest) throws NotFoundException {
+                                     UpdateUserRequest updateUserRequest) {
         log.debug("Updating user with username: {} ", existingUsername);
 
         Application application = checkIfApplicationExists(applicationUid);
@@ -141,7 +133,7 @@ public class UserService {
         return usersRepository.save(updatedUser);
     }
 
-    public void deleteUserByUsername(String applicationUid, String username) throws NotFoundException {
+    public void deleteUserByUsername(String applicationUid, String username) {
         log.debug("Deleting User with username {}", username);
 
         checkIfApplicationExists(applicationUid);
@@ -160,16 +152,16 @@ public class UserService {
 
     private Application checkIfApplicationExists(String applicationUid) {
         final Application application = applicationService.getByUid(applicationUid);
-        validateObject(application == null, "Application not exists !");
+        validateObject(application == null, APPLICATION_NOT_EXISTS);
         return application;
     }
 
-    private User getUser(User user) throws NotFoundException {
+    private User getUser(User user) {
         validateObject(user == null, USER_NOT_FOUND);
         return user;
     }
 
-    private void validateObject(String requestUsername, String requestEmail) throws ConflictException {
+    private void validateObject(String requestUsername, String requestEmail) {
         boolean username = usersRepository.findByUsernameIgnoreCase(requestUsername) != null;
         if (username) {
             throw new ConflictException(String.format("A user with name %s already exist", requestUsername));

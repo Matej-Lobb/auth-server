@@ -32,7 +32,7 @@ public class LicenseService {
         return licensesRepository.findByLicense(hash);
     }
 
-    public License generate(Role role, String username) throws NotFoundException {
+    public License generate(Role role, String username) {
         final String encodedLicense = passwordEncoder.encode(getLicenseInput(role, username));
         final String extractedRawLicense = extractLicense(encodedLicense);
         final String license = splitEncodedLicense(extractedRawLicense);

@@ -30,7 +30,7 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
     }
 
     @Override
-    public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(final Authentication authentication) {
         if (authentication.getName() == null || authentication.getCredentials() == null) {
             return null;
         }
@@ -45,33 +45,43 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
         if (user == null) {
             user = usersRepository.findByUsernameIgnoreCase(identification);
             username = true;
-            if (user == null) {
-                throw new UsernameNotFoundException(String.format("No user present with identification: %s",
-                        identification));
-            }
+            validateObject(identification, user == null, "No user present with identification: %s");
         }
 
-        if (Boolean.FALSE.equals(user.getActive())) {
-            throw new UsernameNotFoundException(String.format("User %s is not active !", identification));
-        }
+        validateObject(identification, Boolean.FALSE.equals(user.getActive()), "User %s is not active !");
 
         final String providedUserIdentification = authentication.getName();
         final Object providedUserPassword = authentication.getCredentials();
 
-        String dbIdentification;
+        String dbIdentification = getIdentification(username, user);
 
+        return validateCredentials(user, providedUserIdentification, providedUserPassword, dbIdentification);
+    }
+
+    private Authentication validateCredentials(User user, String providedUserIdentification, Object providedUserPassword, String dbIdentification) {
+        if (providedUserIdentification.equalsIgnoreCase(dbIdentification)
+                && passwordEncoder.matches(providedUserPassword.toString(), user.getPassword())) {
+            return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(),
+                    constructAuthorities(user));
+        } else {
+            throw new UsernameNotFoundException("Invalid username or password.");
+        }
+    }
+
+    private String getIdentification(boolean username, User user) {
+        String dbIdentification;
         if (username) {
             dbIdentification = user.getUsername();
         } else {
             dbIdentification = user.getEmail();
         }
+        return dbIdentification;
+    }
 
-        if (providedUserIdentification.equalsIgnoreCase(dbIdentification)
-                && passwordEncoder.matches(providedUserPassword.toString(), user.getPassword())) {
-            return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(),
-                    constructAuthorities(user));
+    private void validateObject(String identification, boolean equals, String s) {
+        if (equals) {
+            throw new UsernameNotFoundException(String.format(s, identification));
         }
-        throw new UsernameNotFoundException("Invalid username or password.");
     }
 
     @Override
