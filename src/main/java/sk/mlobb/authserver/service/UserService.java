@@ -5,9 +5,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sk.mlobb.authserver.db.ApplicationUsersRepository;
 import sk.mlobb.authserver.db.UsersRepository;
-import sk.mlobb.authserver.db.UserRolesRepository;
 import sk.mlobb.authserver.model.Application;
 import sk.mlobb.authserver.model.ApplicationUser;
 import sk.mlobb.authserver.model.Role;
@@ -27,24 +27,22 @@ import java.util.Set;
 
 @Slf4j
 @Service
+@Transactional
 public class UserService {
 
     private static final String APPLICATION_NOT_EXISTS = "Application not exists !";
     private static final String USER_NOT_FOUND = "User not found";
 
     private final ApplicationUsersRepository applicationUsersRepository;
-    private final UserRolesRepository userRolesRepository;
     private final ApplicationService applicationService;
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     @Autowired
-    public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder,
-                       ApplicationService applicationService, UserMapper userMapper,
-                       UserRolesRepository userRolesRepository, ApplicationUsersRepository applicationUsersRepository) {
+    public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
+                       ApplicationService applicationService, ApplicationUsersRepository applicationUsersRepository) {
         this.applicationUsersRepository = applicationUsersRepository;
-        this.userRolesRepository = userRolesRepository;
         this.applicationService = applicationService;
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
@@ -101,7 +99,7 @@ public class UserService {
         validateUserData(createUserRequest.getUsername(), createUserRequest.getEmail());
         Application application = checkIfApplicationExists(applicationUid);
 
-        return createUser(userMapper.mapCreateUser(createUserRequest, application), application);
+        return createUser(userMapper.mapCreateUser(createUserRequest), application);
     }
 
     private User createUser(User user, Application application) {
@@ -126,7 +124,7 @@ public class UserService {
         final User oldUser = usersRepository.findByUsernameIgnoreCase(existingUsername);
         validateIfObjectExists(oldUser == null, USER_NOT_FOUND);
 
-        User newUser = userMapper.mapUpdateUser(updateUserRequest, application);
+        User newUser = userMapper.mapUpdateUser(updateUserRequest);
 
         final User updatedUser = mapUpdateRequestToUser(oldUser, newUser);
         return usersRepository.save(updatedUser);
@@ -142,7 +140,6 @@ public class UserService {
         validateIfObjectExists(user == null, USER_NOT_FOUND);
 
         applicationUsersRepository.deleteByUserId(user.getId());
-        userRolesRepository.deleteById(user.getId());
         usersRepository.deleteById(user.getId());
     }
 
