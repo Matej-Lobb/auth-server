@@ -12,8 +12,6 @@ import sk.mlobb.authserver.model.Application;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.ApplicationService;
 
-import java.util.List;
-
 @Slf4j
 @RestController
 public class ApplicationController {
@@ -25,19 +23,6 @@ public class ApplicationController {
                                  ApplicationService applicationService) {
         this.restAuthenticationHandler = restAuthenticationHandler;
         this.applicationService = applicationService;
-    }
-
-    @Secured("ADMIN")
-    @GetMapping(value = "/applications/all",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity getAllUsers() {
-        restAuthenticationHandler.checkAccess();
-        final List<Application> applications = applicationService.getAll();
-        if (applications.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(applications, HttpStatus.OK);
     }
 
     @Secured("ADMIN")

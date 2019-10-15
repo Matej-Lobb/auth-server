@@ -19,11 +19,6 @@ public class ApplicationService {
         this.applicationsRepository = applicationsRepository;
     }
 
-    public List<Application> getAll() {
-        log.debug("Getting all Applications !");
-        return applicationsRepository.findAll();
-    }
-
     public Application getByUid(String applicationUid) {
         log.debug("Getting Application by uid {} !", applicationUid);
         return applicationsRepository.findByUid(applicationUid);
