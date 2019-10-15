@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
 import sk.mlobb.authserver.app.AuthServerApplication;
+import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
@@ -24,6 +25,7 @@ import sk.mlobb.authserver.model.rest.response.CheckUserExistenceResponse;
 import sk.mlobb.authserver.rest.UserController;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import static org.mockito.Mockito.when;
 
@@ -77,10 +79,15 @@ public class UsersITest {
                 UpdateUserRequest.builder()
                         .active(true)
                         .country("new")
+                        .password("new")
                         .email("new@new.sk")
                         .firstName("new")
                         .lastName("new")
                         .keepUpdated(false)
+                        .roles(new HashSet<>() {{
+                            add("USER");
+                            add("ADMIN");
+                        }})
                         .build());
         log.info("Response: {}", updateUserResponse);
 
@@ -91,6 +98,7 @@ public class UsersITest {
         Assert.assertEquals("new@new.sk", user.getEmail());
         Assert.assertEquals("new", user.getFirstName());
         Assert.assertEquals("new", user.getLastName());
+        Assert.assertEquals(1, user.getRoles().size());
         Assert.assertFalse(user.getKeepUpdated());
         Assert.assertNotNull(user.getPassword());
 

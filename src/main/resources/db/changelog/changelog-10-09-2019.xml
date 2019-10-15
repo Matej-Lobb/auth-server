@@ -173,11 +173,17 @@
             <column name="role_id" type="BIGINT">
                 <constraints nullable="true" />
             </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="true" />
+            </column>
         </createTable>
 
         <addForeignKeyConstraint baseTableName="licenses"
                                  baseColumnNames="role_id" constraintName="fk_licenses_role_id"
                                  referencedColumnNames="role_id" referencedTableName="roles" />
+        <addForeignKeyConstraint baseTableName="licenses"
+                                 baseColumnNames="user_id" constraintName="fk_licenses_user_id"
+                                 referencedColumnNames="id" referencedTableName="users" />
 
         <addColumn tableName="users">
             <column name="license_id" type="BIGINT">

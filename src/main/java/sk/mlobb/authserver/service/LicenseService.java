@@ -2,68 +2,69 @@ package sk.mlobb.authserver.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.mlobb.authserver.db.LicensesRepository;
+import sk.mlobb.authserver.db.RolesRepository;
 import sk.mlobb.authserver.model.License;
 import sk.mlobb.authserver.model.Role;
+import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 
-import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
 public class LicenseService {
 
     private final LicensesRepository licensesRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final RolesRepository rolesRepository;
+    private final UserService userService;
 
     @Autowired
-    public LicenseService(PasswordEncoder passwordEncoder, LicensesRepository licensesRepository) {
+    public LicenseService(RolesRepository rolesRepository, LicensesRepository licensesRepository,
+                          UserService userService) {
         this.licensesRepository = licensesRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.rolesRepository = rolesRepository;
+        this.userService = userService;
     }
 
-    public List<License> getAllLicenses() {
-        return licensesRepository.findAll();
+    public License getLicense(String userIdentifier) {
+        User user = userService.getUserByName(userIdentifier);
+        return licensesRepository.findByUser(user);
     }
 
-    public License getLicense(String hash) {
-        return licensesRepository.findByLicense(hash);
+    public void deleteLicense(String userIdentifier) {
+        User user = userService.getUserByName(userIdentifier);
+        licensesRepository.deleteByUser(user);
     }
 
-    public License generate(Role role, String username) {
-        final String encodedLicense = passwordEncoder.encode(getLicenseInput(role, username));
-        final String extractedRawLicense = extractLicense(encodedLicense);
-        final String license = splitEncodedLicense(extractedRawLicense);
-        return License.builder()
-                .license(license)
-                .role(role)
-                .build();
+    public License updateLicense(String userIdentifier, String role) {
+        User user = userService.getUserByName(userIdentifier);
+        Role dbRole = rolesRepository.findByRole(role);
+        checkRole(role, dbRole);
+
+        License existingLicense = licensesRepository.findByUser(user);
+        existingLicense.setRole(dbRole);
+        existingLicense.setLicense(generateLicense());
+        return licensesRepository.save(existingLicense);
     }
 
-    private String splitEncodedLicense(String license) {
-        String rawLicense = license.substring(0, 23);
-        int totalLength = rawLicense.length();
-        int halfIndex = totalLength / 2;
-        int thirdIndex = halfIndex / 2;
-        return rawLicense.substring(0, thirdIndex) + "-"
-                + rawLicense.substring(thirdIndex, thirdIndex * 2) + "-"
-                + rawLicense.substring(thirdIndex * 2, thirdIndex * 3) + "-"
-                + rawLicense.substring(thirdIndex * 3, totalLength);
+
+    public License addLicenseToUser(String username, String role) {
+        User user = userService.getUserByName(username);
+        Role dbRole = rolesRepository.findByRole(role);
+        checkRole(role, dbRole);
+        License license = License.builder().license(generateLicense()).user(user).build();
+        return licensesRepository.save(license);
     }
 
-    private String extractLicense(final String encodedString) {
-        StringBuilder rawLicenseBuilder = new StringBuilder();
-        for (char charOrNumber : encodedString.toCharArray()) {
-            if (Character.isLetterOrDigit(charOrNumber)) {
-                rawLicenseBuilder.append(charOrNumber);
-            }
+    private String generateLicense() {
+        return UUID.randomUUID().toString();
+    }
+
+    private void checkRole(String role, Role dbRole) {
+        if (dbRole == null) {
+            throw new NotFoundException(String.format("Failed to get defined role: %s", role));
         }
-        return rawLicenseBuilder.toString();
-    }
-
-    private String getLicenseInput(Role role, String username) {
-        return String.format("%s-%s", role.getRole(), username);
     }
 }

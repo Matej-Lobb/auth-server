@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sk.mlobb.authserver.db.ApplicationUsersRepository;
+import sk.mlobb.authserver.db.RolesRepository;
 import sk.mlobb.authserver.db.UsersRepository;
 import sk.mlobb.authserver.model.Application;
 import sk.mlobb.authserver.model.ApplicationUser;
@@ -18,6 +19,7 @@ import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
 import sk.mlobb.authserver.model.rest.response.CheckUserExistenceResponse;
+import sk.mlobb.authserver.service.mappers.UpdateUserWrapper;
 import sk.mlobb.authserver.service.mappers.UserMapper;
 
 import javax.mail.internet.AddressException;
@@ -36,14 +38,17 @@ public class UserService {
     private final ApplicationUsersRepository applicationUsersRepository;
     private final ApplicationService applicationService;
     private final UsersRepository usersRepository;
+    private final RolesRepository rolesRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     @Autowired
     public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
-                       ApplicationService applicationService, ApplicationUsersRepository applicationUsersRepository) {
+                       ApplicationService applicationService, ApplicationUsersRepository applicationUsersRepository,
+                       RolesRepository rolesRepository) {
         this.applicationUsersRepository = applicationUsersRepository;
         this.applicationService = applicationService;
+        this.rolesRepository = rolesRepository;
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
@@ -113,9 +118,8 @@ public class UserService {
         return dbUser;
     }
 
-    // TODO Update Roles / License
     public User updateUserByUsername(String applicationUid, String existingUsername,
-                                     UpdateUserRequest updateUserRequest) {
+                                     UpdateUserRequest updateUserRequest, Boolean canChangeRole) {
         log.debug("Updating user with username: {} ", existingUsername);
 
         Application application = checkIfApplicationExists(applicationUid);
@@ -124,10 +128,32 @@ public class UserService {
         final User oldUser = usersRepository.findByUsernameIgnoreCase(existingUsername);
         validateIfObjectExists(oldUser == null, USER_NOT_FOUND);
 
-        User newUser = userMapper.mapUpdateUser(updateUserRequest);
-
-        final User updatedUser = mapUpdateRequestToUser(oldUser, newUser);
+        checkPasswordChange(updateUserRequest, oldUser);
+        if (canChangeRole) {
+            checkRolesChange(updateUserRequest, oldUser);
+        }
+        User updatedUser = userMapper.mapUpdateUser(UpdateUserWrapper.builder().user(oldUser)
+                .request(updateUserRequest).build());
         return usersRepository.save(updatedUser);
+    }
+
+    private void checkRolesChange(UpdateUserRequest updateUserRequest, User oldUser) {
+        if (updateUserRequest.getRoles() != null && !updateUserRequest.getRoles().isEmpty()) {
+            Set<Role> finalRoles = new HashSet<>();
+            for (String role : updateUserRequest.getRoles()) {
+                Role dbRole = rolesRepository.findByRole(role);
+                validateIfObjectExists(dbRole == null, String.format("Role: %s not found !", role));
+                finalRoles.add(dbRole);
+            }
+            oldUser.setRoles(finalRoles);
+        }
+    }
+
+    private void checkPasswordChange(UpdateUserRequest updateUserRequest, User oldUser) {
+        if (!StringUtils.isEmpty(updateUserRequest.getPassword()) && !oldUser.getPassword()
+                .equals(updateUserRequest.getPassword())) {
+            oldUser.setPassword(passwordEncoder.encode(updateUserRequest.getPassword()));
+        }
     }
 
     public void deleteUserByUsername(String applicationUid, String username) {
@@ -152,9 +178,9 @@ public class UserService {
         }
     }
 
-    private void validateIfObjectExists(boolean exists, String userNotFound) {
+    private void validateIfObjectExists(boolean exists, String message) {
         if (exists) {
-            throw new NotFoundException(userNotFound);
+            throw new NotFoundException(message);
         }
     }
 
@@ -194,34 +220,6 @@ public class UserService {
         if (email) {
             throw new ConflictException(String.format("A user with email %s already exist", requestEmail));
         }
-    }
-
-    private User mapUpdateRequestToUser(User oldUser, User newUser) {
-        if (newUser.getKeepUpdated() != null) {
-            oldUser.setKeepUpdated(newUser.getKeepUpdated());
-        }
-        if (newUser.getActive() != null) {
-            oldUser.setActive(newUser.getActive());
-        }
-        if (newUser.getDateOfBirth() != null) {
-            oldUser.setDateOfBirth(newUser.getDateOfBirth());
-        }
-        if (!StringUtils.isEmpty(newUser.getCountry())) {
-            oldUser.setCountry(newUser.getCountry());
-        }
-        if (!StringUtils.isEmpty(newUser.getEmail())) {
-            oldUser.setEmail(newUser.getEmail());
-        }
-        if (!StringUtils.isEmpty(newUser.getFirstName())) {
-            oldUser.setFirstName(newUser.getFirstName());
-        }
-        if (!StringUtils.isEmpty(newUser.getLastName())) {
-            oldUser.setLastName(newUser.getLastName());
-        }
-        if (!StringUtils.isEmpty(newUser.getPassword()) && !oldUser.getPassword().equals(newUser.getPassword())) {
-            oldUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-        }
-        return oldUser;
     }
 
     private boolean isValidEmailAddress(String email) {

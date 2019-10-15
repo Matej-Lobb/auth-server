@@ -97,12 +97,14 @@ public class UserController {
                                                   @PathVariable("username") String username,
                                                   @Valid @RequestBody UpdateUserRequest updateUserRequest) {
         if (restAuthenticationHandler.isAdminAccess()) {
-            return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest));
+            return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest,
+                    true));
         } else {
             // Allow only self User Data not others
             final User userFromContext = restAuthenticationHandler.getUserFromContext();
             if (userFromContext.getUsername().equals(username)) {
-                return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest));
+                return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest,
+                        false));
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
