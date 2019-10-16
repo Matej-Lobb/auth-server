@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import sk.mlobb.authserver.model.Application;
+import sk.mlobb.authserver.model.permission.DefaultPermission;
+import sk.mlobb.authserver.model.permission.PermissionAlias;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.ApplicationService;
 
@@ -25,7 +27,8 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    @Secured("ADMIN")
+    @DefaultPermission
+    @PermissionAlias("get-application")
     @GetMapping(value = "/applications/{uid}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})

@@ -7,5 +7,6 @@ import sk.mlobb.authserver.model.Role;
 @Repository
 public interface RolesRepository extends JpaRepository<Role, Integer> {
 
+    void deleteByRole(String role);
     Role findByRole(String role);
 }

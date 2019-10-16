@@ -5,7 +5,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import sk.mlobb.authserver.model.User;
+import sk.mlobb.authserver.model.permission.DefaultPermission;
+import sk.mlobb.authserver.model.permission.PermissionAlias;
 import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
@@ -36,7 +37,8 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Secured("ADMIN")
+    @DefaultPermission
+    @PermissionAlias("get-all-users")
     @GetMapping(value = "/applications/{applicationUid}/users",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
@@ -49,19 +51,23 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @DefaultPermission
+    @PermissionAlias("check-user-exist")
     @PostMapping(value = {"/applications/{applicationUid}/users/check"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity checkUserDataExistence(@PathVariable("applicationUid") String applicationUid,
-                                           @Valid @RequestBody CheckUserExistenceRequest checkUserExistenceRequest) {
+                                                 @Valid @RequestBody CheckUserExistenceRequest checkUserExistenceRequest) {
         return ResponseEntity.ok(userService.checkUserDataExistence(applicationUid, checkUserExistenceRequest));
     }
 
+    @DefaultPermission(readSelf = true)
+    @PermissionAlias("get-user")
     @GetMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity getUserByName(@PathVariable("applicationUid") String applicationUid,
-                                           @PathVariable("identifier") String identifier) {
+                                        @PathVariable("identifier") String identifier) {
         if (restAuthenticationHandler.isAdminAccess()) {
             return getUser(userService.getUserByName(applicationUid, identifier));
         } else {
@@ -77,11 +83,13 @@ public class UserController {
         }
     }
 
+    @DefaultPermission
+    @PermissionAlias("create-user")
     @PostMapping(value = {"/applications/{applicationUid}/users"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity createUser(@PathVariable("applicationUid") String applicationUid,
-                                        @Valid @RequestBody CreateUserRequest request, UriComponentsBuilder ucBuilder) {
+                                     @Valid @RequestBody CreateUserRequest request, UriComponentsBuilder ucBuilder) {
         log.info("Creating user " + request.getUsername());
         final User dbUser = userService.createUser(applicationUid, request);
         final HttpHeaders headers = new HttpHeaders();
@@ -90,12 +98,14 @@ public class UserController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
+    @DefaultPermission(readSelf = true, writeSelf = true)
+    @PermissionAlias("update-user")
     @PutMapping(value = {"/applications/{applicationUid}/users/{username}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity updateUserByUsername(@PathVariable("applicationUid") String applicationUid,
-                                                  @PathVariable("username") String username,
-                                                  @Valid @RequestBody UpdateUserRequest updateUserRequest) {
+                                               @PathVariable("username") String username,
+                                               @Valid @RequestBody UpdateUserRequest updateUserRequest) {
         if (restAuthenticationHandler.isAdminAccess()) {
             return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest,
                     true));
@@ -110,11 +120,13 @@ public class UserController {
         }
     }
 
+    @DefaultPermission(readSelf = true, writeSelf = true)
+    @PermissionAlias("delete-user")
     @DeleteMapping(value = {"/applications/{applicationUid}/users/{username}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity deleteUserByName(@PathVariable("applicationUid") String applicationUid,
-                                              @PathVariable("username") String username) {
+                                           @PathVariable("username") String username) {
         if (restAuthenticationHandler.isAdminAccess()) {
             userService.deleteUserByUsername(applicationUid, username);
         } else {

@@ -21,7 +21,7 @@
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="default_role_id" baseTableName="applications"
-                                 constraintName="fk_applications_default_role_id" referencedColumnNames="role_id"
+                                 constraintName="fk_applications_default_role_id" referencedColumnNames="id"
                                  referencedTableName="roles"/>
 
         <createTable tableName="application_users">
@@ -54,7 +54,7 @@
                                  referencedTableName="applications" referencedColumnNames="id"/>
         <addForeignKeyConstraint constraintName="application_roles_role_id_application_id"
                                  baseTableName="application_roles" baseColumnNames="role_id"
-                                 referencedTableName="roles" referencedColumnNames="role_id"/>
+                                 referencedTableName="roles" referencedColumnNames="id"/>
 
         <createTable tableName="application_service_users">
             <column name="application_id" type="BIGINT">

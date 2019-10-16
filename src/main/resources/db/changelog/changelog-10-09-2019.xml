@@ -54,16 +54,62 @@
 
     <changeSet id="10-09-2019-2" author="Matej Lobb">
         <createTable tableName="roles">
-            <column name="role_id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="role" type="varchar(20)">
                 <constraints nullable="false"/>
             </column>
             <column name="super_access" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="permissions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="method_name" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="controller" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="name_alias" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="annotation" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="read_all" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="read_self" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="write_all" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="write_self" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <createTable tableName="role_permissions">
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="permission_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="role_permissions_permission_id_role_id"
+                                 baseTableName="role_permissions" baseColumnNames="role_id"
+                                 referencedTableName="roles" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="role_permissions_role_id_permission_id"
+                                 baseTableName="role_permissions" baseColumnNames="permission_id"
+                                 referencedTableName="permissions" referencedColumnNames="id"/>
 
         <createTable tableName="users">
             <column name="id" type="BIGINT" autoIncrement="true">
@@ -113,36 +159,36 @@
         <addForeignKeyConstraint constraintName="user_role_role" baseTableName="user_roles" baseColumnNames="user_id"
                                  referencedTableName="users" referencedColumnNames="id"/>
         <addForeignKeyConstraint constraintName="role_user_role" baseTableName="user_roles" baseColumnNames="role_id"
-                                 referencedTableName="roles" referencedColumnNames="role_id"/>
+                                 referencedTableName="roles" referencedColumnNames="id"/>
 
         <insert tableName="roles">
-            <column name="role_id" valueNumeric="1"/>
+            <column name="id" valueNumeric="1"/>
             <column name="role" value="ADMIN"/>
             <column name="super_access" valueBoolean="true"/>
         </insert>
         <insert tableName="roles">
-            <column name="role_id" valueNumeric="2"/>
+            <column name="id" valueNumeric="2"/>
             <column name="role" value="OFFICER"/>
             <column name="super_access" valueBoolean="true"/>
         </insert>
         <insert tableName="roles">
-            <column name="role_id" valueNumeric="3"/>
+            <column name="id" valueNumeric="3"/>
             <column name="role" value="USER"/>
         </insert>
         <insert tableName="roles">
-            <column name="role_id" valueNumeric="4"/>
+            <column name="id" valueNumeric="4"/>
             <column name="role" value="PROFESSIONAL"/>
         </insert>
         <insert tableName="roles">
-            <column name="role_id" valueNumeric="5"/>
+            <column name="id" valueNumeric="5"/>
             <column name="role" value="BUSINESS"/>
         </insert>
         <insert tableName="roles">
-            <column name="role_id" valueNumeric="6"/>
+            <column name="id" valueNumeric="6"/>
             <column name="role" value="ENTERPRISE"/>
         </insert>
         <insert tableName="roles">
-            <column name="role_id" valueNumeric="7"/>
+            <column name="id" valueNumeric="7"/>
             <column name="role" value="SERVICE"/>
         </insert>
 
@@ -180,7 +226,7 @@
 
         <addForeignKeyConstraint baseTableName="licenses"
                                  baseColumnNames="role_id" constraintName="fk_licenses_role_id"
-                                 referencedColumnNames="role_id" referencedTableName="roles" />
+                                 referencedColumnNames="id" referencedTableName="roles" />
         <addForeignKeyConstraint baseTableName="licenses"
                                  baseColumnNames="user_id" constraintName="fk_licenses_user_id"
                                  referencedColumnNames="id" referencedTableName="users" />
