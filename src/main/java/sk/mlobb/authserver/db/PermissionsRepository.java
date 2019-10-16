@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import sk.mlobb.authserver.model.permission.Permission;
 
 @Repository
-public interface PermissionsRepository extends JpaRepository<Permission, Integer> {
+public interface PermissionsRepository extends JpaRepository<Permission, Long> {
 }

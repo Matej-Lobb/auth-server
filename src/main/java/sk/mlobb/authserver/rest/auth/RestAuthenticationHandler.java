@@ -2,13 +2,13 @@ package sk.mlobb.authserver.rest.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.exception.NotFoundException;
+import sk.mlobb.authserver.model.permission.Permission;
 import sk.mlobb.authserver.service.UserService;
 
 import java.lang.reflect.Method;
@@ -28,44 +28,35 @@ public class RestAuthenticationHandler {
         this.userService = userService;
     }
 
-
-    /**
-     * Check access with Reflections
-     *
-     * This will only work if file Name contains 'Controller' in name
-     */
     public void checkAccess() {
+        Permission permission = getPermission();
+        log.debug(permission.toString());
+        // TODO Handle Permission
+    }
+
+    private Permission getPermission() {
         StackTraceElement controller = getController();
         final Method[] methods = getClassName(controller).getDeclaredMethods();
+        Permission finalPermission = null;
         for (Method method : methods) {
-            if (method.getName().equalsIgnoreCase(controller.getMethodName()) &&
-                    method.isAnnotationPresent(Secured.class)) {
-                boolean authenticated = false;
+            if (method.getName().equalsIgnoreCase(controller.getMethodName())) {
                 for (Role role : getUserFromContext().getRoles()) {
-                    for (String annotationValue : method.getAnnotation(Secured.class).value()) {
-                        if (role.getRole().equalsIgnoreCase(annotationValue)) {
-                            authenticated = true;
+                    for (Permission rolePermission : role.getPermissions()) {
+                        if (rolePermission.getMethodName().equals(controller.getMethodName())) {
+                            finalPermission = rolePermission;
                             break;
                         }
                     }
                 }
-                if (!authenticated) {
-                    throw new UsernameNotFoundException("No access to resource !");
-                }
             }
         }
-    }
-
-    public boolean isAdminAccess() {
-        for (Role role : getUserFromContext().getRoles()) {
-            if (Boolean.TRUE.equals(role.getSuperAccess())) {
-                return true;
-            }
+        if (finalPermission == null) {
+            throw new UsernameNotFoundException("No access to resource !");
         }
-        return false;
+        return finalPermission;
     }
 
-    public User getUserFromContext() {
+    private User getUserFromContext() {
         try {
             return userService.getUserByName(SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal().toString());

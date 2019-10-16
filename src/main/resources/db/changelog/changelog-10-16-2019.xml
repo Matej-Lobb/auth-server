@@ -1,0 +1,701 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="10-16-2019-1" author="Matej Lobb">
+        <insert tableName="permissions">
+            <column name="method_name" value="getAllUsers"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-all-users"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="updateUserByUsername"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="update-user"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getByName"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="get-application"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="deleteUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="delete-user"/>
+            <column name="annotation" value="DeleteMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="createUser"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="create-user"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-user"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="checkUserDataExistence"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="check-user-exist"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="7"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="getAllUsers"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-all-users"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="updateUserByUsername"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="update-user"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getByName"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="get-application"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="deleteUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="delete-user"/>
+            <column name="annotation" value="DeleteMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="createUser"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="create-user"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-user"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="checkUserDataExistence"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="check-user-exist"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="2"/>
+            <column name="permission_id" valueNumeric="8"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="2"/>
+            <column name="permission_id" valueNumeric="9"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="2"/>
+            <column name="permission_id" valueNumeric="10"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="2"/>
+            <column name="permission_id" valueNumeric="11"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="2"/>
+            <column name="permission_id" valueNumeric="12"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="2"/>
+            <column name="permission_id" valueNumeric="13"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="2"/>
+            <column name="permission_id" valueNumeric="14"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="getAllUsers"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-all-users"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="updateUserByUsername"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="update-user"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getByName"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="get-application"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="deleteUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="delete-user"/>
+            <column name="annotation" value="DeleteMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="createUser"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="create-user"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-user"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="checkUserDataExistence"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="check-user-exist"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="3"/>
+            <column name="permission_id" valueNumeric="15"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="3"/>
+            <column name="permission_id" valueNumeric="16"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="3"/>
+            <column name="permission_id" valueNumeric="17"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="3"/>
+            <column name="permission_id" valueNumeric="18"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="3"/>
+            <column name="permission_id" valueNumeric="19"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="3"/>
+            <column name="permission_id" valueNumeric="20"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="3"/>
+            <column name="permission_id" valueNumeric="21"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="getAllUsers"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-all-users"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="updateUserByUsername"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="update-user"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getByName"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="get-application"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="deleteUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="delete-user"/>
+            <column name="annotation" value="DeleteMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="createUser"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="create-user"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-user"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="checkUserDataExistence"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="check-user-exist"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="4"/>
+            <column name="permission_id" valueNumeric="22"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="4"/>
+            <column name="permission_id" valueNumeric="23"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="4"/>
+            <column name="permission_id" valueNumeric="24"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="4"/>
+            <column name="permission_id" valueNumeric="25"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="4"/>
+            <column name="permission_id" valueNumeric="26"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="4"/>
+            <column name="permission_id" valueNumeric="27"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="4"/>
+            <column name="permission_id" valueNumeric="28"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="getAllUsers"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-all-users"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="updateUserByUsername"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="update-user"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getByName"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="get-application"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="deleteUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="delete-user"/>
+            <column name="annotation" value="DeleteMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="createUser"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="create-user"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-user"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="checkUserDataExistence"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="check-user-exist"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="5"/>
+            <column name="permission_id" valueNumeric="29"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="5"/>
+            <column name="permission_id" valueNumeric="30"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="5"/>
+            <column name="permission_id" valueNumeric="31"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="5"/>
+            <column name="permission_id" valueNumeric="32"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="5"/>
+            <column name="permission_id" valueNumeric="33"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="5"/>
+            <column name="permission_id" valueNumeric="34"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="5"/>
+            <column name="permission_id" valueNumeric="35"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="getAllUsers"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-all-users"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="updateUserByUsername"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="update-user"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getByName"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="get-application"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="deleteUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="delete-user"/>
+            <column name="annotation" value="DeleteMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="createUser"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="create-user"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-user"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="checkUserDataExistence"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="check-user-exist"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="6"/>
+            <column name="permission_id" valueNumeric="36"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="6"/>
+            <column name="permission_id" valueNumeric="37"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="6"/>
+            <column name="permission_id" valueNumeric="38"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="6"/>
+            <column name="permission_id" valueNumeric="39"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="6"/>
+            <column name="permission_id" valueNumeric="40"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="6"/>
+            <column name="permission_id" valueNumeric="41"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="6"/>
+            <column name="permission_id" valueNumeric="42"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="getAllUsers"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-all-users"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="updateUserByUsername"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="update-user"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getByName"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="get-application"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="deleteUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="delete-user"/>
+            <column name="annotation" value="DeleteMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="createUser"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="create-user"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="getUserByName"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="get-user"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="false"/>
+            <column name="read_self" valueBoolean="false"/>
+            <column name="write_all" valueBoolean="false"/>
+            <column name="write_self" valueBoolean="false"/>
+        </insert>
+        <insert tableName="permissions">
+            <column name="method_name" value="checkUserDataExistence"/>
+            <column name="controller" value="UserController"/>
+            <column name="name_alias" value="check-user-exist"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="7"/>
+            <column name="permission_id" valueNumeric="43"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="7"/>
+            <column name="permission_id" valueNumeric="44"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="7"/>
+            <column name="permission_id" valueNumeric="45"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="7"/>
+            <column name="permission_id" valueNumeric="46"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="7"/>
+            <column name="permission_id" valueNumeric="47"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="7"/>
+            <column name="permission_id" valueNumeric="48"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="7"/>
+            <column name="permission_id" valueNumeric="49"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

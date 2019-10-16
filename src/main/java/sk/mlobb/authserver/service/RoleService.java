@@ -6,16 +6,16 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import sk.mlobb.authserver.db.PermissionsRepository;
-import sk.mlobb.authserver.db.RolePermissionsRepository;
 import sk.mlobb.authserver.db.RolesRepository;
 import sk.mlobb.authserver.model.Role;
-import sk.mlobb.authserver.model.RolePermissions;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.permission.DefaultPermission;
 import sk.mlobb.authserver.model.permission.Access;
 import sk.mlobb.authserver.model.permission.Permission;
 import sk.mlobb.authserver.model.permission.PermissionAlias;
+import sk.mlobb.authserver.model.rest.request.UpdateRoleRequest;
+import sk.mlobb.authserver.service.mappers.RoleMapper;
+import sk.mlobb.authserver.service.mappers.UpdateRoleWrapper;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -25,45 +25,30 @@ import java.util.Set;
 
 @Slf4j
 @Service
-@Transactional
 public class RoleService {
 
-    private final RolePermissionsRepository rolePermissionsRepository;
-    private final PermissionsRepository permissionsRepository;
     private final ApplicationContext applicationContext;
     private final RolesRepository rolesRepository;
+    private final RoleMapper roleMapper;
 
     private Object[] acceptedAnnotations = {GetMapping.class, PostMapping.class, DeleteMapping.class,
             PutMapping.class, PatchMapping.class, RequestMapping.class};
 
-    public RoleService(ApplicationContext applicationContext, RolesRepository rolesRepository,
-                       RolePermissionsRepository rolePermissionsRepository,
-                       PermissionsRepository permissionsRepository) {
-        this.rolePermissionsRepository = rolePermissionsRepository;
-        this.permissionsRepository = permissionsRepository;
+    public RoleService(ApplicationContext applicationContext, RolesRepository rolesRepository, RoleMapper roleMapper) {
         this.applicationContext = applicationContext;
         this.rolesRepository = rolesRepository;
+        this.roleMapper = roleMapper;
     }
 
+    @Transactional
     public Role addRole(String roleName) {
-        Role dbRole = rolesRepository.save(Role.builder().role(roleName).build());
-        Set<RolePermissions> rolePermissions = new HashSet<>();
-        for (Permission defaultPermission : getDefaultPermissions()) {
-            Permission dbPermission = permissionsRepository.save(defaultPermission);
-            rolePermissions.add(RolePermissions.builder().permissionId(dbPermission.getId()).roleId(dbRole.getId())
-                    .build());
-        }
-        for (RolePermissions rolePermission: rolePermissions) {
-            rolePermissionsRepository.save(rolePermission);
-        }
-        return rolesRepository.findByRole(dbRole.getRole());
+        log.debug("Adding role: {}", roleName);
+        return rolesRepository.save(Role.builder().role(roleName).permissions(getDefaultPermissions()).build());
     }
 
-    public void deleteRole(String roleName) {
-        rolesRepository.deleteByRole(roleName);
-    }
-
+    @Transactional
     public Role getRoleByName(String role) {
+        log.debug("Getting role: {}", role);
         Role dbRole = rolesRepository.findByRole(role);
         if (dbRole == null) {
             throw new NotFoundException("Role not found !");
@@ -71,7 +56,23 @@ public class RoleService {
         return dbRole;
     }
 
+    @Transactional
+    public void updateRole(String role, UpdateRoleRequest updateRoleRequest) {
+        log.debug("Updating role: {}", role);
+        Role dbRole = roleMapper.mapUpdateRole(UpdateRoleWrapper.builder().role(getRoleByName(role))
+                .request(updateRoleRequest).build());
+        rolesRepository.save(dbRole);
+    }
+
+    @Transactional
+    public void deleteRole(String roleName) {
+        log.debug("Deleting role: {}", roleName);
+        Role role = getRoleByName(roleName);
+        rolesRepository.delete(role);
+    }
+
     private Set<Permission> getDefaultPermissions() {
+        log.debug("Building default permissions !");
         Set<Permission> permissions = new HashSet<>();
         Map<String, Object> beansWithAnnotation = applicationContext.getBeansWithAnnotation(RestController.class);
         for (Object controller : beansWithAnnotation.values()) {
@@ -86,13 +87,14 @@ public class RoleService {
                 }
             }
         }
+        log.debug("Default permissions: {}", permissions);
         return permissions;
     }
 
     private Permission buildPermission(Object controller, Method method, Object annotation) {
         log.debug("Building Permission for method: {}", method.getName());
         Permission permission = Permission.builder().methodName(method.getName())
-                .controller(controller.getClass().getSimpleName()).annotation(annotation.getClass().getSimpleName())
+                .controller(controller.getClass().getSimpleName()).annotation(((Class) annotation).getSimpleName())
                 .build();
         DefaultPermission definedPermission = AnnotationUtils.getAnnotation(method, DefaultPermission.class);
         if (definedPermission == null) {

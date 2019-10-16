@@ -58,6 +58,7 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity checkUserDataExistence(@PathVariable("applicationUid") String applicationUid,
                                                  @Valid @RequestBody CheckUserExistenceRequest checkUserExistenceRequest) {
+        restAuthenticationHandler.checkAccess();
         return ResponseEntity.ok(userService.checkUserDataExistence(applicationUid, checkUserExistenceRequest));
     }
 
@@ -68,19 +69,8 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity getUserByName(@PathVariable("applicationUid") String applicationUid,
                                         @PathVariable("identifier") String identifier) {
-        if (restAuthenticationHandler.isAdminAccess()) {
-            return getUser(userService.getUserByName(applicationUid, identifier));
-        } else {
-            // Allow only self User Data not others
-            final User userFromContext = restAuthenticationHandler.getUserFromContext();
-            if (userFromContext.getUsername().equals(identifier)) {
-                return getUser(userService.getUserByName(applicationUid, identifier));
-            }
-            if (userFromContext.getEmail().equals(identifier)) {
-                return getUser(userService.getUserByName(applicationUid, identifier));
-            }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        restAuthenticationHandler.checkAccess();
+        return getUser(userService.getUserByName(applicationUid, identifier));
     }
 
     @DefaultPermission
@@ -90,6 +80,7 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity createUser(@PathVariable("applicationUid") String applicationUid,
                                      @Valid @RequestBody CreateUserRequest request, UriComponentsBuilder ucBuilder) {
+        restAuthenticationHandler.checkAccess();
         log.info("Creating user " + request.getUsername());
         final User dbUser = userService.createUser(applicationUid, request);
         final HttpHeaders headers = new HttpHeaders();
@@ -106,18 +97,8 @@ public class UserController {
     public ResponseEntity updateUserByUsername(@PathVariable("applicationUid") String applicationUid,
                                                @PathVariable("username") String username,
                                                @Valid @RequestBody UpdateUserRequest updateUserRequest) {
-        if (restAuthenticationHandler.isAdminAccess()) {
-            return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest,
-                    true));
-        } else {
-            // Allow only self User Data not others
-            final User userFromContext = restAuthenticationHandler.getUserFromContext();
-            if (userFromContext.getUsername().equals(username)) {
-                return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest,
-                        false));
-            }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        restAuthenticationHandler.checkAccess();
+        return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest, true));
     }
 
     @DefaultPermission(readSelf = true, writeSelf = true)
@@ -127,17 +108,8 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity deleteUserByName(@PathVariable("applicationUid") String applicationUid,
                                            @PathVariable("username") String username) {
-        if (restAuthenticationHandler.isAdminAccess()) {
-            userService.deleteUserByUsername(applicationUid, username);
-        } else {
-            // Allow only self User Data not others
-            final User userFromContext = restAuthenticationHandler.getUserFromContext();
-            if (userFromContext.getUsername().equals(username)) {
-                userService.deleteUserByUsername(applicationUid, username);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-        }
+        restAuthenticationHandler.checkAccess();
+        userService.deleteUserByUsername(applicationUid, username);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

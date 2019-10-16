@@ -5,8 +5,7 @@ import org.springframework.stereotype.Repository;
 import sk.mlobb.authserver.model.Role;
 
 @Repository
-public interface RolesRepository extends JpaRepository<Role, Integer> {
+public interface RolesRepository extends JpaRepository<Role, Long> {
 
-    void deleteByRole(String role);
     Role findByRole(String role);
 }

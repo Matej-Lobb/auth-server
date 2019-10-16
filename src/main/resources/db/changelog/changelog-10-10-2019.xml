@@ -25,11 +25,14 @@
                                  referencedTableName="roles"/>
 
         <createTable tableName="application_users">
-            <column name="application_id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
             <column name="user_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
@@ -41,11 +44,14 @@
                                  referencedTableName="users" referencedColumnNames="id"/>
 
         <createTable tableName="application_roles">
-            <column name="application_id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
             <column name="role_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
@@ -57,11 +63,14 @@
                                  referencedTableName="roles" referencedColumnNames="id"/>
 
         <createTable tableName="application_service_users">
-            <column name="application_id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
             <column name="user_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
 

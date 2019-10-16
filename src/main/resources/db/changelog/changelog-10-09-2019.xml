@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet id="10-09-2019-1" author="Matej Lobb">
         <createTable tableName="oauth_client_details">
@@ -45,7 +45,8 @@
             <column name="client_id" value="091320fasda123saadaa8259fb484021313123ASDAasd2134asDA2518adea"/>
             <column name="client_secret" value="$2a$10$6.RP85jfZFkrorNWI1ZWZ.Dp4nEUi8z8o7332QHUlbD2pSOfz57Uy"/>
             <column name="scope" value="read,write,trust"/>
-            <column name="authorized_grant_types" value="authorization_code,implicit,password,client_credentials,refresh_token"/>
+            <column name="authorized_grant_types"
+                    value="authorization_code,implicit,password,client_credentials,refresh_token"/>
             <column name="authorities" value="ADMIN,OFFICER,USER,PROFESSIONAL,BUSINESS,ENTERPRISE"/>
             <column name="access_token_validity" valueNumeric="3600"/>
             <column name="refresh_token_validity" valueNumeric="2592000"/>
@@ -59,9 +60,6 @@
             </column>
             <column name="role" type="varchar(20)">
                 <constraints nullable="false"/>
-            </column>
-            <column name="super_access" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="true"/>
             </column>
         </createTable>
 
@@ -96,11 +94,14 @@
         </createTable>
 
         <createTable tableName="role_permissions">
-            <column name="role_id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
             <column name="permission_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
@@ -148,11 +149,14 @@
         </createTable>
 
         <createTable tableName="user_roles">
-            <column name="user_id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
             <column name="role_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
@@ -164,12 +168,10 @@
         <insert tableName="roles">
             <column name="id" valueNumeric="1"/>
             <column name="role" value="ADMIN"/>
-            <column name="super_access" valueBoolean="true"/>
         </insert>
         <insert tableName="roles">
             <column name="id" valueNumeric="2"/>
             <column name="role" value="OFFICER"/>
-            <column name="super_access" valueBoolean="true"/>
         </insert>
         <insert tableName="roles">
             <column name="id" valueNumeric="3"/>
@@ -199,7 +201,7 @@
             <column name="active" valueBoolean="true"/>
             <column name="email" value="matej.lobb@gmail.com"/>
             <column name="keep_updated" valueBoolean="true"/>
-            <column name="country" value="Slovakia" />
+            <column name="country" value="Slovakia"/>
             <column name="password" value="$2a$06$aYrCcyuS/NMuActk7fwFZO0UZ2sBkg3KfswBWtfnIIKYlzxX5nJB."/>
             <column name="dob" valueDate="1992-08-07"/>
         </insert>
@@ -217,19 +219,19 @@
                 <constraints nullable="false"/>
             </column>
             <column name="role_id" type="BIGINT">
-                <constraints nullable="true" />
+                <constraints nullable="true"/>
             </column>
             <column name="user_id" type="BIGINT">
-                <constraints nullable="true" />
+                <constraints nullable="true"/>
             </column>
         </createTable>
 
         <addForeignKeyConstraint baseTableName="licenses"
                                  baseColumnNames="role_id" constraintName="fk_licenses_role_id"
-                                 referencedColumnNames="id" referencedTableName="roles" />
+                                 referencedColumnNames="id" referencedTableName="roles"/>
         <addForeignKeyConstraint baseTableName="licenses"
                                  baseColumnNames="user_id" constraintName="fk_licenses_user_id"
-                                 referencedColumnNames="id" referencedTableName="users" />
+                                 referencedColumnNames="id" referencedTableName="users"/>
 
         <addColumn tableName="users">
             <column name="license_id" type="BIGINT">
@@ -239,7 +241,7 @@
 
         <addForeignKeyConstraint baseTableName="users"
                                  baseColumnNames="license_id" constraintName="fk_users_licenses_license_id"
-                                 referencedColumnNames="id" referencedTableName="licenses" />
+                                 referencedColumnNames="id" referencedTableName="licenses"/>
 
         <insert tableName="licenses">
             <column name="license" value="ASDA-123AS-3123ASD-1234"/>
