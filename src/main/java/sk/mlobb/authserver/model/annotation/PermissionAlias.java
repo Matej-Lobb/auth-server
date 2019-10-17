@@ -1,4 +1,4 @@
-package sk.mlobb.authserver.model.permission;
+package sk.mlobb.authserver.model.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

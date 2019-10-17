@@ -7,10 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import sk.mlobb.authserver.model.permission.DefaultPermission;
-import sk.mlobb.authserver.model.permission.PermissionAlias;
+import sk.mlobb.authserver.model.annotation.DefaultPermission;
+import sk.mlobb.authserver.model.annotation.PermissionAlias;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.ApplicationService;
+
+import static sk.mlobb.authserver.model.enums.RequiredAccess.*;
 
 @Slf4j
 @RestController
@@ -31,7 +33,11 @@ public class ApplicationController {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity getByName(@PathVariable("uid") String uid) {
-        restAuthenticationHandler.checkAccess();
+        if (restAuthenticationHandler.checkIfAccessingOwnApplicationData(uid)) {
+            restAuthenticationHandler.validateAccess(READ_SELF);
+        } else {
+            restAuthenticationHandler.validateAccess(READ_ALL);
+        }
         return new ResponseEntity<>(applicationService.getByUid(uid), HttpStatus.OK);
     }
 }

@@ -16,12 +16,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
 import sk.mlobb.authserver.app.AuthServerApplication;
-import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
-import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
-import sk.mlobb.authserver.model.rest.response.CheckUserExistenceResponse;
 import sk.mlobb.authserver.rest.UserController;
 
 import java.time.LocalDate;
@@ -42,9 +39,10 @@ public class UsersITest {
 
     @Test
     public void testUsersFlow() {
+        // get user with create access
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        when(authentication.getPrincipal()).thenReturn("test");
+        when(authentication.getPrincipal()).thenReturn("lobor");
 
         CreateUserRequest createUserRequest = CreateUserRequest.builder()
                 .active(true)
@@ -64,6 +62,9 @@ public class UsersITest {
                 uriComponentsBuilder);
         log.info("Response: {}", createUserResponse);
         Assert.assertEquals(HttpStatus.CREATED, createUserResponse.getStatusCode());
+
+        // get created user
+        when(authentication.getPrincipal()).thenReturn("test");
 
         log.info("Getting user: {}", createUserRequest.getUsername());
         ResponseEntity<?> getUserResponse = userController.getUserByName(APPLICATION_UID,
@@ -101,16 +102,6 @@ public class UsersITest {
         Assert.assertEquals(1, user.getRoles().size());
         Assert.assertFalse(user.getKeepUpdated());
         Assert.assertNotNull(user.getPassword());
-
-        ResponseEntity<?> checkUserDataResponse = userController.checkUserDataExistence(APPLICATION_UID,
-                CheckUserExistenceRequest.builder().username("test").email("new@new.sk").build());
-
-        Assert.assertEquals(HttpStatus.OK, checkUserDataResponse.getStatusCode());
-        CheckUserExistenceResponse checkUserExistenceResponse = (CheckUserExistenceResponse)
-                checkUserDataResponse.getBody();
-        Assert.assertNotNull(checkUserExistenceResponse);
-        Assert.assertFalse(checkUserExistenceResponse.getEmailIsUnique());
-        Assert.assertFalse(checkUserExistenceResponse.getUsernameIsUnique());
 
         log.info("Deleting user: {}", user.getUsername());
         ResponseEntity<?> deleteUserResponse = userController.deleteUserByName(APPLICATION_UID, user.getUsername());

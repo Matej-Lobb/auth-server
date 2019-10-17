@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import sk.mlobb.authserver.model.User;
-import sk.mlobb.authserver.model.permission.DefaultPermission;
-import sk.mlobb.authserver.model.permission.PermissionAlias;
+import sk.mlobb.authserver.model.annotation.DefaultPermission;
+import sk.mlobb.authserver.model.annotation.PermissionAlias;
 import sk.mlobb.authserver.model.rest.request.CheckUserExistenceRequest;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
@@ -24,6 +24,8 @@ import sk.mlobb.authserver.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Set;
+
+import static sk.mlobb.authserver.model.enums.RequiredAccess.*;
 
 @Slf4j
 @RestController
@@ -43,7 +45,7 @@ public class UserController {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity getAllUsers(@PathVariable("applicationUid") String applicationUid) {
-        restAuthenticationHandler.checkAccess();
+        restAuthenticationHandler.validateAccess(READ_ALL);
         final Set<User> users = userService.getAllUsers(applicationUid);
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -58,7 +60,7 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity checkUserDataExistence(@PathVariable("applicationUid") String applicationUid,
                                                  @Valid @RequestBody CheckUserExistenceRequest checkUserExistenceRequest) {
-        restAuthenticationHandler.checkAccess();
+        restAuthenticationHandler.validateAccess(READ_ALL, WRITE_ALL);
         return ResponseEntity.ok(userService.checkUserDataExistence(applicationUid, checkUserExistenceRequest));
     }
 
@@ -69,7 +71,11 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity getUserByName(@PathVariable("applicationUid") String applicationUid,
                                         @PathVariable("identifier") String identifier) {
-        restAuthenticationHandler.checkAccess();
+        if (restAuthenticationHandler.checkIfAccessingOwnUserData(identifier)) {
+            restAuthenticationHandler.validateAccess(READ_SELF);
+        } else {
+            restAuthenticationHandler.validateAccess(READ_ALL);
+        }
         return getUser(userService.getUserByName(applicationUid, identifier));
     }
 
@@ -80,7 +86,7 @@ public class UserController {
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity createUser(@PathVariable("applicationUid") String applicationUid,
                                      @Valid @RequestBody CreateUserRequest request, UriComponentsBuilder ucBuilder) {
-        restAuthenticationHandler.checkAccess();
+        restAuthenticationHandler.validateAccess(READ_ALL, WRITE_ALL);
         log.info("Creating user " + request.getUsername());
         final User dbUser = userService.createUser(applicationUid, request);
         final HttpHeaders headers = new HttpHeaders();
@@ -91,25 +97,36 @@ public class UserController {
 
     @DefaultPermission(readSelf = true, writeSelf = true)
     @PermissionAlias("update-user")
-    @PutMapping(value = {"/applications/{applicationUid}/users/{username}"},
+    @PutMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity updateUserByUsername(@PathVariable("applicationUid") String applicationUid,
-                                               @PathVariable("username") String username,
+                                               @PathVariable("identifier") String identifier,
                                                @Valid @RequestBody UpdateUserRequest updateUserRequest) {
-        restAuthenticationHandler.checkAccess();
-        return getUser(userService.updateUserByUsername(applicationUid, username, updateUserRequest, true));
+        if (restAuthenticationHandler.checkIfAccessingOwnUserData(identifier)) {
+            restAuthenticationHandler.validateAccess(WRITE_SELF, READ_SELF);
+            return getUser(userService.updateUserByUsername(applicationUid, identifier, updateUserRequest,
+                    false));
+        } else {
+            restAuthenticationHandler.validateAccess(WRITE_ALL, READ_ALL);
+            return getUser(userService.updateUserByUsername(applicationUid, identifier, updateUserRequest,
+                    true));
+        }
     }
 
     @DefaultPermission(readSelf = true, writeSelf = true)
     @PermissionAlias("delete-user")
-    @DeleteMapping(value = {"/applications/{applicationUid}/users/{username}"},
+    @DeleteMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity deleteUserByName(@PathVariable("applicationUid") String applicationUid,
-                                           @PathVariable("username") String username) {
-        restAuthenticationHandler.checkAccess();
-        userService.deleteUserByUsername(applicationUid, username);
+                                           @PathVariable("identifier") String identifier) {
+        if (restAuthenticationHandler.checkIfAccessingOwnUserData(identifier)) {
+            restAuthenticationHandler.validateAccess(WRITE_SELF);
+        } else {
+            restAuthenticationHandler.validateAccess(WRITE_ALL);
+        }
+        userService.deleteUserByUsername(applicationUid, identifier);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

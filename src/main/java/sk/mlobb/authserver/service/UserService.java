@@ -88,8 +88,7 @@ public class UserService {
     public User getUserByName(String applicationUid, String identifier) {
         log.debug("Get user by identifier: {}", identifier);
 
-        Application application = checkIfApplicationExists(applicationUid);
-        checkIfUserIsPartOfApplication(application, identifier);
+        checkIfUserIsPartOfApplication(applicationUid, identifier);
 
         if (isValidEmailAddress(identifier)) {
             return getUser(usersRepository.findByEmailIgnoreCase(identifier));
@@ -107,23 +106,11 @@ public class UserService {
         return createUser(userMapper.mapCreateUser(createUserRequest), application);
     }
 
-    private User createUser(User user, Application application) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        Set<Role> roles = new HashSet<>();
-        roles.add(application.getDefaultUserRole());
-        user.setRoles(roles);
-        User dbUser = usersRepository.save(user);
-        applicationUsersRepository.save(ApplicationUser.builder().applicationId(application.getId())
-                .userId(dbUser.getId()).build());
-        return dbUser;
-    }
-
     public User updateUserByUsername(String applicationUid, String existingUsername,
                                      UpdateUserRequest updateUserRequest, Boolean canChangeRole) {
         log.debug("Updating user with username: {} ", existingUsername);
 
-        Application application = checkIfApplicationExists(applicationUid);
-        checkIfUserIsPartOfApplication(application, existingUsername);
+        checkIfUserIsPartOfApplication(applicationUid, existingUsername);
 
         final User oldUser = usersRepository.findByUsernameIgnoreCase(existingUsername);
         validateIfObjectExists(oldUser == null, USER_NOT_FOUND);
@@ -135,6 +122,42 @@ public class UserService {
         User updatedUser = userMapper.mapUpdateUser(UpdateUserWrapper.builder().user(oldUser)
                 .request(updateUserRequest).build());
         return usersRepository.save(updatedUser);
+    }
+
+    public void deleteUserByUsername(String applicationUid, String username) {
+        log.debug("Deleting User with username {}", username);
+
+        checkIfUserIsPartOfApplication(applicationUid, username);
+
+        User user = usersRepository.findByUsernameIgnoreCase(username);
+        validateIfObjectExists(user == null, USER_NOT_FOUND);
+
+        applicationUsersRepository.deleteByUserId(user.getId());
+        usersRepository.deleteById(user.getId());
+    }
+
+    public User getUserByName(String identifier) {
+        log.debug("Get user by identifier: {}", identifier);
+        if (isValidEmailAddress(identifier)) {
+            return getUser(usersRepository.findByEmailIgnoreCase(identifier));
+        } else {
+            return getUser(usersRepository.findByUsernameIgnoreCase(identifier));
+        }
+    }
+
+    public void checkIfUserIsPartOfApplication(String uid, String identifier) {
+        checkIfUserIsPartOfApplication(checkIfApplicationExists(uid), identifier);
+    }
+
+    private User createUser(User user, Application application) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Set<Role> roles = new HashSet<>();
+        roles.add(application.getDefaultUserRole());
+        user.setRoles(roles);
+        User dbUser = usersRepository.save(user);
+        applicationUsersRepository.save(ApplicationUser.builder().applicationId(application.getId())
+                .userId(dbUser.getId()).build());
+        return dbUser;
     }
 
     private void checkRolesChange(UpdateUserRequest updateUserRequest, User oldUser) {
@@ -153,28 +176,6 @@ public class UserService {
         if (!StringUtils.isEmpty(updateUserRequest.getPassword()) && !oldUser.getPassword()
                 .equals(updateUserRequest.getPassword())) {
             oldUser.setPassword(passwordEncoder.encode(updateUserRequest.getPassword()));
-        }
-    }
-
-    public void deleteUserByUsername(String applicationUid, String username) {
-        log.debug("Deleting User with username {}", username);
-
-        Application application = checkIfApplicationExists(applicationUid);
-        checkIfUserIsPartOfApplication(application, username);
-
-        User user = usersRepository.findByUsernameIgnoreCase(username);
-        validateIfObjectExists(user == null, USER_NOT_FOUND);
-
-        applicationUsersRepository.deleteByUserId(user.getId());
-        usersRepository.deleteById(user.getId());
-    }
-
-    public User getUserByName(String identifier) {
-        log.debug("Get user by identifier: {}", identifier);
-        if (isValidEmailAddress(identifier)) {
-            return getUser(usersRepository.findByEmailIgnoreCase(identifier));
-        } else {
-            return getUser(usersRepository.findByUsernameIgnoreCase(identifier));
         }
     }
 

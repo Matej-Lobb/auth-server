@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import sk.mlobb.authserver.db.RolesRepository;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.exception.NotFoundException;
-import sk.mlobb.authserver.model.permission.DefaultPermission;
+import sk.mlobb.authserver.model.annotation.DefaultPermission;
 import sk.mlobb.authserver.model.permission.Access;
 import sk.mlobb.authserver.model.permission.Permission;
-import sk.mlobb.authserver.model.permission.PermissionAlias;
+import sk.mlobb.authserver.model.annotation.PermissionAlias;
 import sk.mlobb.authserver.model.rest.request.UpdateRoleRequest;
 import sk.mlobb.authserver.service.mappers.RoleMapper;
 import sk.mlobb.authserver.service.mappers.UpdateRoleWrapper;
@@ -69,6 +69,17 @@ public class RoleService {
         log.debug("Deleting role: {}", roleName);
         Role role = getRoleByName(roleName);
         rolesRepository.delete(role);
+    }
+
+    @Transactional
+    public Permission getDefaultPermission(String controller, String method) {
+        Set<Permission> defaultPermissions = getDefaultPermissions();
+        for (Permission permission: defaultPermissions) {
+            if (permission.getController().equals(controller) && permission.getMethodName().equals(method)) {
+                return permission;
+            }
+        }
+        throw new NotFoundException("Controller and method not found !");
     }
 
     private Set<Permission> getDefaultPermissions() {
