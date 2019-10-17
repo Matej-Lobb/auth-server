@@ -2,10 +2,8 @@ package sk.mlobb.authserver.db;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import sk.mlobb.authserver.model.Role;
+import sk.mlobb.authserver.model.ApplicationRole;
 
 @Repository
-public interface RolesRepository extends JpaRepository<Role, Long> {
-
-    Role findByRole(String role);
+public interface ApplicationRolesRepository extends JpaRepository<ApplicationRole, Long> {
 }

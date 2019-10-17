@@ -2,13 +2,17 @@ package sk.mlobb.authserver.rest.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
+import sk.mlobb.authserver.model.enums.RequiredAccess;
 import sk.mlobb.authserver.model.exception.NotFoundException;
+import sk.mlobb.authserver.model.exception.UnauthorizedException;
+import sk.mlobb.authserver.model.permission.Access;
+import sk.mlobb.authserver.model.permission.Permission;
+import sk.mlobb.authserver.service.RoleService;
 import sk.mlobb.authserver.service.UserService;
 
 import java.lang.reflect.Method;
@@ -23,52 +27,117 @@ public class RestAuthenticationHandler {
     private static final String CONTROLLER = "Controller";
 
     private final UserService userService;
+    private final RoleService roleService;
 
-    public RestAuthenticationHandler(UserService userService) {
+    public RestAuthenticationHandler(UserService userService, RoleService roleService) {
+        this.roleService = roleService;
         this.userService = userService;
     }
 
+    public void validateAccess(RequiredAccess ... requiredAccesses) {
+        Access access = getPermission().getAccess();
+        for (RequiredAccess requiredAccess : requiredAccesses) {
+            switch (requiredAccess) {
+                case READ_ALL:
+                    checkBoolean(access.isReadAll());
+                    break;
+                case READ_SELF:
+                    checkBoolean(access.isReadSelf());
+                    break;
+                case WRITE_ALL:
+                    checkBoolean(access.isWriteAll());
+                    break;
+                case WRITE_SELF:
+                    checkBoolean(access.isWriteSelf());
+                    break;
+                default:
+                    throw new UnauthorizedException("Unauthorized !");
+            }
+        }
+    }
 
-    /**
-     * Check access with Reflections
-     *
-     * This will only work if file Name contains 'Controller' in name
-     */
-    public void checkAccess() {
+    private void checkBoolean(boolean haveAccess) {
+        if (haveAccess) {
+            return;
+        }
+        throw new UnauthorizedException("Unauthorized !");
+    }
+
+    private Permission getPermission() {
         StackTraceElement controller = getController();
         final Method[] methods = getClassName(controller).getDeclaredMethods();
+        Permission finalPermission = null;
         for (Method method : methods) {
-            if (method.getName().equalsIgnoreCase(controller.getMethodName()) &&
-                    method.isAnnotationPresent(Secured.class)) {
-                boolean authenticated = false;
-                for (Role role : getUserFromContext().getRoles()) {
-                    for (String annotationValue : method.getAnnotation(Secured.class).value()) {
-                        if (role.getRole().equalsIgnoreCase(annotationValue)) {
-                            authenticated = true;
-                            break;
-                        }
-                    }
-                }
-                if (!authenticated) {
-                    throw new UsernameNotFoundException("No access to resource !");
-                }
-            }
+            finalPermission = getControllerMethod(controller, finalPermission, method);
         }
+        if (finalPermission == null) {
+            finalPermission = buildAndUpdateUserPermission(controller);
+        }
+        return finalPermission;
     }
 
-    public boolean isAdminAccess() {
-        for (Role role : getUserFromContext().getRoles()) {
-            if (Boolean.TRUE.equals(role.getSuperAccess())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public User getUserFromContext() {
+    private Permission buildAndUpdateUserPermission(StackTraceElement controllerElement) {
         try {
-            return userService.getUserByName(SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal().toString());
+            String methodName = controllerElement.getMethodName();
+            String controllerName = getClassName(controllerElement).getSimpleName();
+            log.warn("Permission for {}:{} not found ! Trying to generate new default one!",
+                    controllerName, methodName);
+            Permission defaultPermission = roleService.getDefaultPermission(controllerName, methodName);
+            log.debug("Successfully generated new Permission: {}", defaultPermission);
+            //TODO Update user with missing permission
+            return defaultPermission;
+        } catch (Exception e) {
+            log.error("Failed to build permission !", e);
+            throw new UnauthorizedException("Unauthorized !");
+        }
+    }
+
+    private Permission getControllerMethod(StackTraceElement controller, Permission finalPermission, Method method) {
+        if (method.getName().equalsIgnoreCase(controller.getMethodName())) {
+            finalPermission = getUserPermissions(controller, finalPermission);
+        }
+        return finalPermission;
+    }
+
+    private Permission getUserPermissions(StackTraceElement controller, Permission finalPermission) {
+        for (Role role : getUserFromContext().getRoles()) {
+            finalPermission = getRolePermissions(controller, finalPermission, role);
+        }
+        return finalPermission;
+    }
+
+    private Permission getRolePermissions(StackTraceElement controller, Permission finalPermission, Role role) {
+        for (Permission rolePermission : role.getPermissions()) {
+            if (rolePermission.getMethodName().equals(controller.getMethodName())) {
+                finalPermission = rolePermission;
+                break;
+            }
+        }
+        return finalPermission;
+    }
+
+    public boolean checkIfAccessingOwnApplicationData(String uid) {
+        try {
+            userService.checkIfUserIsPartOfApplication(uid, getUserFromContext().getUsername());
+            return true;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    public boolean checkIfAccessingOwnUserData(String identifier) {
+        if (getUserFromContext().getUsername().equals(identifier)) {
+            return true;
+        } else {
+            return getUserFromContext().getEmail().equals(identifier);
+        }
+    }
+
+    private User getUserFromContext() {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            log.debug("Context username: {}", username);
+            return userService.getUserByName(username);
         } catch (NotFoundException e) {
             throw new UsernameNotFoundException("User not exist in current context!");
         }
@@ -82,7 +151,7 @@ public class RestAuthenticationHandler {
                 log.error("Unable to find controller !", e);
             }
         }
-        throw new UsernameNotFoundException("Failed to find controller file !");
+        throw new UsernameNotFoundException("Failed to find controller !");
     }
 
     private StackTraceElement getController() {
@@ -92,7 +161,7 @@ public class RestAuthenticationHandler {
                 return stackTraceElement;
             }
         }
-        throw new UsernameNotFoundException("Failed to find controller file !");
+        throw new UsernameNotFoundException("Failed to find controller !");
     }
 
     private List<StackTraceElement> getProjectClasses() {

@@ -5,7 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.time.LocalDate;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -23,4 +25,5 @@ public class UpdateUserRequest {
     private LocalDate dateOfBirth;
     private String country;
     private byte[] profilePicture;
+    private Set<String> roles;
 }

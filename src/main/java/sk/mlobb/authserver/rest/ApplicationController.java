@@ -4,15 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import sk.mlobb.authserver.model.Application;
+import sk.mlobb.authserver.model.annotation.DefaultPermission;
+import sk.mlobb.authserver.model.annotation.PermissionAlias;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.ApplicationService;
 
-import java.util.List;
+import static sk.mlobb.authserver.model.enums.RequiredAccess.READ_ALL;
+import static sk.mlobb.authserver.model.enums.RequiredAccess.READ_SELF;
 
 @Slf4j
 @RestController
@@ -27,29 +28,17 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    @Secured("ADMIN")
-    @GetMapping(value = "/applications/all",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity getAllUsers() {
-        restAuthenticationHandler.checkAccess();
-        final List<Application> applications = applicationService.getAll();
-        if (applications.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(applications, HttpStatus.OK);
-    }
-
-    @Secured("ADMIN")
+    @DefaultPermission
+    @PermissionAlias("get-application")
     @GetMapping(value = "/applications/{uid}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity getByName(@PathVariable("uid") String uid) {
-        restAuthenticationHandler.checkAccess();
-        final Application applications = applicationService.getByUid(uid);
-        if (applications == null) {
-            return ResponseEntity.notFound().build();
+        if (restAuthenticationHandler.checkIfAccessingOwnApplicationData(uid)) {
+            restAuthenticationHandler.validateAccess(READ_SELF);
+        } else {
+            restAuthenticationHandler.validateAccess(READ_ALL);
         }
-        return new ResponseEntity<>(applications, HttpStatus.OK);
+        return new ResponseEntity<>(applicationService.getByUid(uid), HttpStatus.OK);
     }
 }

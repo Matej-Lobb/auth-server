@@ -21,27 +21,121 @@
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="default_role_id" baseTableName="applications"
-                                 constraintName="fk_applications_default_role_id" referencedColumnNames="role_id"
+                                 constraintName="fk_applications_default_role_id" referencedColumnNames="id"
                                  referencedTableName="roles"/>
 
-        <addColumn tableName="users">
-            <column name="application_id" type="BIGINT">
-                <constraints nullable="true"/>
+        <createTable tableName="application_users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
             </column>
-        </addColumn>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
 
-        <addForeignKeyConstraint baseColumnNames="application_id" baseTableName="users"
-                                 constraintName="fk_application_id_users_user" referencedColumnNames="id"
-                                 referencedTableName="applications"/>
+        <addForeignKeyConstraint constraintName="application_users_application_id_user_id"
+                                 baseTableName="application_users" baseColumnNames="application_id"
+                                 referencedTableName="applications" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="application_users_user_id_application_id"
+                                 baseTableName="application_users" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"/>
+
+        <createTable tableName="application_roles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="application_roles_application_id_user_id"
+                                 baseTableName="application_roles" baseColumnNames="application_id"
+                                 referencedTableName="applications" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="application_roles_role_id_application_id"
+                                 baseTableName="application_roles" baseColumnNames="role_id"
+                                 referencedTableName="roles" referencedColumnNames="id"/>
+
+        <createTable tableName="application_service_users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <insert tableName="users">
+            <column name="username" value="service1as2233asdas313254154adsa123a"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="email" value="matej.lobb@gmail.com"/>
+            <column name="password" value="$2a$06$aYrCcyuS/NMuActk7fwFZO0UZ2sBkg3KfswBWtfnIIKYlzxX5nJB."/>
+        </insert>
+
+        <insert tableName="user_roles">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="role_id" valueNumeric="7"/>
+        </insert>
+
+        <addForeignKeyConstraint constraintName="application_service_users_application_id_user_id"
+                                 baseTableName="application_service_users" baseColumnNames="application_id"
+                                 referencedTableName="applications" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="application_service_users_user_id_application_id"
+                                 baseTableName="application_service_users" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"/>
 
         <insert tableName="applications">
-            <column name="name" value="test"/>
+            <column name="name" value="Test Application"/>
             <column name="uid" value="1s2a1x"/>
             <column name="default_role_id" valueNumeric="3"/>
         </insert>
 
-        <sql>
-            UPDATE users SET application_id = 1 where id = 1;
-        </sql>
+        <insert tableName="application_users">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="user_id" valueNumeric="1"/>
+        </insert>
+
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="7"/>
+        </insert>
+
+        <insert tableName="application_service_users">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="user_id" valueNumeric="2"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>

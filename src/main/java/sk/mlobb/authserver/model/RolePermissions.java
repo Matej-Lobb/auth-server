@@ -7,22 +7,26 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "user_roles")
-public class UserRoles implements Serializable {
+@Table(name = "role_permissions")
+public class RolePermissions {
 
     @Id
-    @Column(name = "user_id")
-    private long userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "role_id")
-    private long userRoleId;
+    private Long roleId;
+
+    @Column(name = "permission_id")
+    private Long permissionId;
 }

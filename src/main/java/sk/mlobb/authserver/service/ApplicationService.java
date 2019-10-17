@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import sk.mlobb.authserver.db.ApplicationsRepository;
 import sk.mlobb.authserver.model.Application;
 
-import java.util.List;
-
 @Slf4j
 @Service
 public class ApplicationService {
@@ -17,11 +15,6 @@ public class ApplicationService {
     @Autowired
     public ApplicationService(ApplicationsRepository applicationsRepository) {
         this.applicationsRepository = applicationsRepository;
-    }
-
-    public List<Application> getAll() {
-        log.debug("Getting all Applications !");
-        return applicationsRepository.findAll();
     }
 
     public Application getByUid(String applicationUid) {
