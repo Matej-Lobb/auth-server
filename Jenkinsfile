@@ -43,6 +43,9 @@ pipeline {
       }
     }
     stage('Remove Docker Image') {
+      when {
+        branch 'develop' 
+      }
       steps {
         sh '''
             docker-compose -f docker-compose-db.yml down --remove-orphans || true
@@ -50,6 +53,9 @@ pipeline {
       }
     }
     stage('Build and Publish Docker Image') {
+      when {
+        branch 'develop' 
+      }
       steps {
         sh '''
             docker-compose -f docker-compose-db.yml up -d --build
