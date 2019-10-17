@@ -12,7 +12,8 @@ import sk.mlobb.authserver.model.annotation.PermissionAlias;
 import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
 import sk.mlobb.authserver.service.ApplicationService;
 
-import static sk.mlobb.authserver.model.enums.RequiredAccess.*;
+import static sk.mlobb.authserver.model.enums.RequiredAccess.READ_ALL;
+import static sk.mlobb.authserver.model.enums.RequiredAccess.READ_SELF;
 
 @Slf4j
 @RestController

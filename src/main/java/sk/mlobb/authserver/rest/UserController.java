@@ -25,7 +25,10 @@ import sk.mlobb.authserver.service.UserService;
 import javax.validation.Valid;
 import java.util.Set;
 
-import static sk.mlobb.authserver.model.enums.RequiredAccess.*;
+import static sk.mlobb.authserver.model.enums.RequiredAccess.READ_ALL;
+import static sk.mlobb.authserver.model.enums.RequiredAccess.READ_SELF;
+import static sk.mlobb.authserver.model.enums.RequiredAccess.WRITE_ALL;
+import static sk.mlobb.authserver.model.enums.RequiredAccess.WRITE_SELF;
 
 @Slf4j
 @RestController

@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import sk.mlobb.authserver.db.ApplicationsRepository;
 import sk.mlobb.authserver.model.Application;
 
-import java.util.List;
-
 @Slf4j
 @Service
 public class ApplicationService {
