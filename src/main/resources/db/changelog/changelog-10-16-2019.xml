@@ -26,7 +26,7 @@
             <column name="write_self" valueBoolean="true"/>
         </insert>
         <insert tableName="permissions">
-            <column name="method_name" value="getByName"/>
+            <column name="method_name" value="getApplicationByUid"/>
             <column name="controller" value="ApplicationController"/>
             <column name="name_alias" value="get-application"/>
             <column name="annotation" value="GetMapping" />
@@ -125,7 +125,7 @@
             <column name="write_self" valueBoolean="true"/>
         </insert>
         <insert tableName="permissions">
-            <column name="method_name" value="getByName"/>
+            <column name="method_name" value="getApplicationByUid"/>
             <column name="controller" value="ApplicationController"/>
             <column name="name_alias" value="get-application"/>
             <column name="annotation" value="GetMapping" />
@@ -224,7 +224,7 @@
             <column name="write_self" valueBoolean="true"/>
         </insert>
         <insert tableName="permissions">
-            <column name="method_name" value="getByName"/>
+            <column name="method_name" value="getApplicationByUid"/>
             <column name="controller" value="ApplicationController"/>
             <column name="name_alias" value="get-application"/>
             <column name="annotation" value="GetMapping" />
@@ -323,7 +323,7 @@
             <column name="write_self" valueBoolean="true"/>
         </insert>
         <insert tableName="permissions">
-            <column name="method_name" value="getByName"/>
+            <column name="method_name" value="getApplicationByUid"/>
             <column name="controller" value="ApplicationController"/>
             <column name="name_alias" value="get-application"/>
             <column name="annotation" value="GetMapping" />
@@ -422,7 +422,7 @@
             <column name="write_self" valueBoolean="true"/>
         </insert>
         <insert tableName="permissions">
-            <column name="method_name" value="getByName"/>
+            <column name="method_name" value="getApplicationByUid"/>
             <column name="controller" value="ApplicationController"/>
             <column name="name_alias" value="get-application"/>
             <column name="annotation" value="GetMapping" />
@@ -521,7 +521,7 @@
             <column name="write_self" valueBoolean="true"/>
         </insert>
         <insert tableName="permissions">
-            <column name="method_name" value="getByName"/>
+            <column name="method_name" value="getApplicationByUid"/>
             <column name="controller" value="ApplicationController"/>
             <column name="name_alias" value="get-application"/>
             <column name="annotation" value="GetMapping" />
@@ -620,7 +620,7 @@
             <column name="write_self" valueBoolean="false"/>
         </insert>
         <insert tableName="permissions">
-            <column name="method_name" value="getByName"/>
+            <column name="method_name" value="getApplicationByUid"/>
             <column name="controller" value="ApplicationController"/>
             <column name="name_alias" value="get-application"/>
             <column name="annotation" value="GetMapping" />

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.enums.RequiredAccess;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class RestAuthenticationHandler {
+public class AuthorizationHandler {
 
     private static final String PACKAGE_NAME = "sk.mlobb.authserver";
     private static final String CONTROLLER = "Controller";
@@ -29,11 +30,12 @@ public class RestAuthenticationHandler {
     private final UserService userService;
     private final RoleService roleService;
 
-    public RestAuthenticationHandler(UserService userService, RoleService roleService) {
+    public AuthorizationHandler(UserService userService, RoleService roleService) {
         this.roleService = roleService;
         this.userService = userService;
     }
 
+    @Transactional
     public void validateAccess(RequiredAccess ... requiredAccesses) {
         Access access = getPermission().getAccess();
         for (RequiredAccess requiredAccess : requiredAccesses) {
@@ -53,6 +55,27 @@ public class RestAuthenticationHandler {
                 default:
                     throw new UnauthorizedException("Unauthorized !");
             }
+        }
+    }
+
+    @Transactional
+    public boolean checkIfAccessingOwnApplicationData(String uid) {
+        try {
+            userService.checkIfUserIsPartOfApplication(uid, getUserFromContext().getUsername());
+            return true;
+        } catch (NotFoundException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    @Transactional
+    public boolean checkIfAccessingOwnUserData(String identifier) {
+        if (getUserFromContext().getUsername().equals(identifier)) {
+            return true;
+        } else {
+            return getUserFromContext().getEmail().equals(identifier);
         }
     }
 
@@ -114,23 +137,6 @@ public class RestAuthenticationHandler {
             }
         }
         return finalPermission;
-    }
-
-    public boolean checkIfAccessingOwnApplicationData(String uid) {
-        try {
-            userService.checkIfUserIsPartOfApplication(uid, getUserFromContext().getUsername());
-            return true;
-        } catch (Exception exception) {
-            return false;
-        }
-    }
-
-    public boolean checkIfAccessingOwnUserData(String identifier) {
-        if (getUserFromContext().getUsername().equals(identifier)) {
-            return true;
-        } else {
-            return getUserFromContext().getEmail().equals(identifier);
-        }
     }
 
     private User getUserFromContext() {

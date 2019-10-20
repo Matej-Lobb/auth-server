@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="10-20-2019-1" author="Matej Lobb">
+        <insert tableName="permissions">
+            <column name="method_name" value="getApplicationRoles"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="get-application-roles"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="50"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="updateApplicationDetails"/>
+            <column name="controller" value="ApplicationController"/>
+            <column name="name_alias" value="update-application-details"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="51"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="10-20-2019-2" author="Matej Lobb">
+        <addColumn tableName="roles">
+            <column name="application_id" type="BIGINT"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="roles" baseColumnNames="application_id"
+                                 constraintName="fk_roles_application_id_id" referencedColumnNames="id"
+                                 referencedTableName="applications"/>
+
+        <sql>
+            UPDATE roles SET application_id = 1 where id = 1;
+            UPDATE roles SET application_id = 1 where id = 2;
+            UPDATE roles SET application_id = 1 where id = 3;
+            UPDATE roles SET application_id = 1 where id = 4;
+            UPDATE roles SET application_id = 1 where id = 5;
+            UPDATE roles SET application_id = 1 where id = 6;
+            UPDATE roles SET application_id = 1 where id = 7;
+        </sql>
+    </changeSet>
+
+    <changeSet id="10-20-2019-3" author="Matej Lobb">
+        <insert tableName="permissions">
+            <column name="method_name" value="getRoleByName"/>
+            <column name="controller" value="RoleController"/>
+            <column name="name_alias" value="get-role"/>
+            <column name="annotation" value="GetMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="52"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="createRole"/>
+            <column name="controller" value="RoleController"/>
+            <column name="name_alias" value="create-role"/>
+            <column name="annotation" value="PostMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="53"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="updateRoleByName"/>
+            <column name="controller" value="RoleController"/>
+            <column name="name_alias" value="update-role"/>
+            <column name="annotation" value="PutMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="54"/>
+        </insert>
+
+        <insert tableName="permissions">
+            <column name="method_name" value="deleteRoleByName"/>
+            <column name="controller" value="RoleController"/>
+            <column name="name_alias" value="delete-role"/>
+            <column name="annotation" value="DeleteMapping" />
+            <column name="read_all" valueBoolean="true"/>
+            <column name="read_self" valueBoolean="true"/>
+            <column name="write_all" valueBoolean="true"/>
+            <column name="write_self" valueBoolean="true"/>
+        </insert>
+        <insert tableName="role_permissions">
+            <column name="role_id" valueNumeric="1"/>
+            <column name="permission_id" valueNumeric="55"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

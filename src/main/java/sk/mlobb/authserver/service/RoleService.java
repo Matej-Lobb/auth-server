@@ -12,13 +12,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sk.mlobb.authserver.db.ApplicationRolesRepository;
 import sk.mlobb.authserver.db.RolesRepository;
+import sk.mlobb.authserver.model.Application;
+import sk.mlobb.authserver.model.ApplicationRole;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.annotation.DefaultPermission;
 import sk.mlobb.authserver.model.annotation.PermissionAlias;
+import sk.mlobb.authserver.model.exception.ConflictException;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.permission.Access;
 import sk.mlobb.authserver.model.permission.Permission;
+import sk.mlobb.authserver.model.rest.request.CreateRoleRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateRoleRequest;
 import sk.mlobb.authserver.service.mappers.RoleMapper;
 import sk.mlobb.authserver.service.mappers.UpdateRoleWrapper;
@@ -33,47 +38,70 @@ import java.util.Set;
 @Service
 public class RoleService {
 
+
+    private final ApplicationRolesRepository applicationRolesRepository;
     private final ApplicationContext applicationContext;
+    private final ApplicationHelper applicationHelper;
     private final RolesRepository rolesRepository;
     private final RoleMapper roleMapper;
 
     private Object[] acceptedAnnotations = {GetMapping.class, PostMapping.class, DeleteMapping.class,
             PutMapping.class, PatchMapping.class, RequestMapping.class};
 
-    public RoleService(ApplicationContext applicationContext, RolesRepository rolesRepository, RoleMapper roleMapper) {
+    public RoleService(ApplicationContext applicationContext, RolesRepository rolesRepository, RoleMapper roleMapper,
+                       ApplicationHelper applicationHelper, ApplicationRolesRepository applicationRolesRepository) {
+        this.applicationRolesRepository = applicationRolesRepository;
         this.applicationContext = applicationContext;
+        this.applicationHelper = applicationHelper;
         this.rolesRepository = rolesRepository;
         this.roleMapper = roleMapper;
     }
 
     @Transactional
-    public Role addRole(String roleName) {
-        log.debug("Adding role: {}", roleName);
-        return rolesRepository.save(Role.builder().role(roleName).permissions(getDefaultPermissions()).build());
+    public Role getRoleByName(String applicationUid, String role) {
+        log.debug("Get role: {}", role);
+
+        checkIfRoleIsPartOfApplication(applicationUid, role);
+
+        return getRoleByName(role);
     }
 
     @Transactional
-    public Role getRoleByName(String role) {
-        log.debug("Getting role: {}", role);
-        Role dbRole = rolesRepository.findByRole(role);
-        if (dbRole == null) {
-            throw new NotFoundException("Role not found !");
-        }
+    public Role addRole(String applicationUid, CreateRoleRequest request) {
+        String roleName = request.getRoleName();
+        log.debug("Creating role: {}", roleName);
+        validateRoleData(roleName);
+
+        Application application = applicationHelper.checkIfApplicationExists(applicationUid);
+
+        Role dbRole = rolesRepository.save(Role.builder().role(roleName).permissions(getDefaultPermissions())
+                .application(application).build());
+        applicationRolesRepository.save(ApplicationRole.builder()
+                .applicationId(application.getId())
+                .roleId(dbRole.getId())
+                .build());
         return dbRole;
     }
 
     @Transactional
-    public void updateRole(String role, UpdateRoleRequest updateRoleRequest) {
+    public Role updateRole(String applicationUid, String role, UpdateRoleRequest updateRoleRequest) {
         log.debug("Updating role: {}", role);
+
+        checkIfRoleIsPartOfApplication(applicationUid, role);
+
         Role dbRole = roleMapper.mapUpdateRole(UpdateRoleWrapper.builder().role(getRoleByName(role))
                 .request(updateRoleRequest).build());
-        rolesRepository.save(dbRole);
+        return rolesRepository.save(dbRole);
     }
 
     @Transactional
-    public void deleteRole(String roleName) {
+    public void deleteRole(String applicationUid, String roleName) {
         log.debug("Deleting role: {}", roleName);
+
+        checkIfRoleIsPartOfApplication(applicationUid, roleName);
+
         Role role = getRoleByName(roleName);
+        applicationRolesRepository.deleteById(role.getId());
         rolesRepository.delete(role);
     }
 
@@ -86,6 +114,40 @@ public class RoleService {
             }
         }
         throw new NotFoundException("Controller and method not found !");
+    }
+
+    @Transactional
+    public Role getRoleByName(String role) {
+        log.debug("Getting role: {}", role);
+        Role dbRole = rolesRepository.findByRole(role);
+        if (dbRole == null) {
+            throw new NotFoundException("Role not found !");
+        }
+        return dbRole;
+    }
+
+    private void validateRoleData(String roleName) {
+        boolean username = rolesRepository.findByRole(roleName) != null;
+        if (username) {
+            throw new ConflictException(String.format("A role with name %s already exist", roleName));
+        }
+    }
+
+    private void checkIfRoleIsPartOfApplication(String uid, String rawRole) {
+        Application application = applicationHelper.checkIfApplicationExists(uid);
+        Set<Role> roles = application.getApplicationRoles();
+        Role dbRole = getRoleByName(rawRole);
+
+        boolean isInCorrectApplication = false;
+        for (Role role : roles) {
+            if (role.getId().equals(dbRole.getId())) {
+                isInCorrectApplication = true;
+                break;
+            }
+        }
+        if (! isInCorrectApplication) {
+            throw new NotFoundException("Role not found in current application !");
+        }
     }
 
     private Set<Permission> getDefaultPermissions() {

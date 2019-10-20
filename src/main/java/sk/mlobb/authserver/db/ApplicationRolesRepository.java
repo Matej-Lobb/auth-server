@@ -6,4 +6,6 @@ import sk.mlobb.authserver.model.ApplicationRole;
 
 @Repository
 public interface ApplicationRolesRepository extends JpaRepository<ApplicationRole, Long> {
+
+    void deleteByRoleId(Long roleId);
 }

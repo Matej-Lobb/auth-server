@@ -29,14 +29,12 @@ import java.util.Set;
 
 @Slf4j
 @Service
-@Transactional
 public class UserService {
 
-    private static final String APPLICATION_NOT_EXISTS = "Application not exists !";
     private static final String USER_NOT_FOUND = "User not found";
 
     private final ApplicationUsersRepository applicationUsersRepository;
-    private final ApplicationService applicationService;
+    private final ApplicationHelper applicationHelper;
     private final UsersRepository usersRepository;
     private final RolesRepository rolesRepository;
     private final PasswordEncoder passwordEncoder;
@@ -44,25 +42,27 @@ public class UserService {
 
     @Autowired
     public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
-                       ApplicationService applicationService, ApplicationUsersRepository applicationUsersRepository,
+                       ApplicationHelper applicationHelper, ApplicationUsersRepository applicationUsersRepository,
                        RolesRepository rolesRepository) {
         this.applicationUsersRepository = applicationUsersRepository;
-        this.applicationService = applicationService;
+        this.applicationHelper = applicationHelper;
         this.rolesRepository = rolesRepository;
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
 
+    @Transactional
     public Set<User> getAllUsers(String applicationUid) {
         log.debug("Getting all users from database.");
-        Application application = checkIfApplicationExists(applicationUid);
+        Application application = applicationHelper.checkIfApplicationExists(applicationUid);
         return application.getUsers();
     }
 
+    @Transactional
     public CheckUserExistenceResponse checkUserDataExistence(String applicationUid,
                                                              CheckUserExistenceRequest checkUserExistenceRequest) {
-        checkIfApplicationExists(applicationUid);
+        applicationHelper.checkIfApplicationExists(applicationUid);
 
         log.debug("Checking user data existence: {}", checkUserExistenceRequest);
         CheckUserExistenceResponse checkUserExistenceResponse = new CheckUserExistenceResponse();
@@ -85,6 +85,7 @@ public class UserService {
         return checkUserExistenceResponse;
     }
 
+    @Transactional
     public User getUserByName(String applicationUid, String identifier) {
         log.debug("Get user by identifier: {}", identifier);
 
@@ -97,15 +98,17 @@ public class UserService {
         }
     }
 
+    @Transactional
     public User createUser(String applicationUid, CreateUserRequest createUserRequest) {
         log.debug("Creating user: {}", createUserRequest.getUsername());
 
         validateUserData(createUserRequest.getUsername(), createUserRequest.getEmail());
-        Application application = checkIfApplicationExists(applicationUid);
+        Application application = applicationHelper.checkIfApplicationExists(applicationUid);
 
         return createUser(userMapper.mapCreateUser(createUserRequest), application);
     }
 
+    @Transactional
     public User updateUserByUsername(String applicationUid, String existingUsername,
                                      UpdateUserRequest updateUserRequest, Boolean canChangeRole) {
         log.debug("Updating user with username: {} ", existingUsername);
@@ -124,6 +127,7 @@ public class UserService {
         return usersRepository.save(updatedUser);
     }
 
+    @Transactional
     public void deleteUserByUsername(String applicationUid, String username) {
         log.debug("Deleting User with username {}", username);
 
@@ -136,6 +140,7 @@ public class UserService {
         usersRepository.deleteById(user.getId());
     }
 
+    @Transactional
     public User getUserByName(String identifier) {
         log.debug("Get user by identifier: {}", identifier);
         if (isValidEmailAddress(identifier)) {
@@ -146,7 +151,20 @@ public class UserService {
     }
 
     public void checkIfUserIsPartOfApplication(String uid, String identifier) {
-        checkIfUserIsPartOfApplication(checkIfApplicationExists(uid), identifier);
+        Application application = applicationHelper.checkIfApplicationExists(uid);
+        Set<User> users = application.getUsers();
+        User dbUser = getUserByName(identifier);
+
+        boolean isInCorrectApplication = false;
+        for (User user : users) {
+            if (user.getId().equals(dbUser.getId())) {
+                isInCorrectApplication = true;
+                break;
+            }
+        }
+        if (! isInCorrectApplication) {
+            throw new NotFoundException("User not found in current application !");
+        }
     }
 
     private User createUser(User user, Application application) {
@@ -182,28 +200,6 @@ public class UserService {
     private void validateIfObjectExists(boolean exists, String message) {
         if (exists) {
             throw new NotFoundException(message);
-        }
-    }
-
-    private Application checkIfApplicationExists(String applicationUid) {
-        final Application application = applicationService.getApplicationByUid(applicationUid);
-        validateIfObjectExists(application == null, APPLICATION_NOT_EXISTS);
-        return application;
-    }
-
-    private void checkIfUserIsPartOfApplication(Application application, String identifier) {
-        Set<User> users = application.getUsers();
-        User dbUser = getUserByName(identifier);
-
-        boolean isInCorrectApplication = false;
-        for (User user : users) {
-            if (user.getId().equals(dbUser.getId())) {
-                isInCorrectApplication = true;
-                break;
-            }
-        }
-        if (! isInCorrectApplication) {
-            throw new NotFoundException("User not found in current application !");
         }
     }
 

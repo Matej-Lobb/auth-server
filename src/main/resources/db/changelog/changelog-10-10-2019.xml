@@ -77,7 +77,7 @@
         <insert tableName="users">
             <column name="username" value="s1ecbr0b64d2"/>
             <column name="active" valueBoolean="true"/>
-            <column name="email" value="matej.lobb@gmail.com"/>
+            <column name="email" value="mlobb@gmail.com"/>
             <column name="password" value="$2a$06$kJQkJPMahNV6qX5nlfKMBuPUJjAZZcuyxbF5uArz9rrQw8DkxggGq"/>
         </insert>
 

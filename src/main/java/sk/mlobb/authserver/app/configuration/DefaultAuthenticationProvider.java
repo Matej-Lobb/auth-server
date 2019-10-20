@@ -5,11 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import sk.mlobb.authserver.db.UsersRepository;
 import sk.mlobb.authserver.model.Role;
 import sk.mlobb.authserver.model.User;
@@ -30,6 +30,7 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
     }
 
     @Override
+    @Transactional
     public Authentication authenticate(final Authentication authentication) {
         if (authentication.getName() == null || authentication.getCredentials() == null) {
             return null;

@@ -7,6 +7,5 @@ import sk.mlobb.authserver.model.Application;
 @Repository
 public interface ApplicationsRepository extends JpaRepository<Application, Long> {
 
-    Application findByName(String name);
     Application findByUid(String uid);
 }

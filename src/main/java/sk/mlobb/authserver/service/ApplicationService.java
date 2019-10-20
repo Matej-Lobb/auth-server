@@ -5,29 +5,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sk.mlobb.authserver.db.ApplicationUsersRepository;
 import sk.mlobb.authserver.db.ApplicationsRepository;
 import sk.mlobb.authserver.model.Application;
 import sk.mlobb.authserver.model.Role;
-import sk.mlobb.authserver.model.User;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.rest.request.UpdateApplicationDetailsRequest;
+
+import java.util.Set;
 
 @Slf4j
 @Service
 public class ApplicationService {
 
-    private final ApplicationUsersRepository applicationUsersRepository;
     private final ApplicationsRepository applicationsRepository;
-    private final UserService userService;
     private final RoleService roleService;
 
     @Autowired
-    public ApplicationService(ApplicationsRepository applicationsRepository, RoleService roleService,
-                              UserService userService, ApplicationUsersRepository applicationUsersRepository) {
-        this.applicationUsersRepository = applicationUsersRepository;
+    public ApplicationService(ApplicationsRepository applicationsRepository, RoleService roleService) {
         this.applicationsRepository = applicationsRepository;
-        this.userService = userService;
         this.roleService = roleService;
     }
 
@@ -49,7 +44,7 @@ public class ApplicationService {
         boolean defaultRoleUpdated = false;
         if (StringUtils.isEmpty(request.getDefaultRoleName()) && !StringUtils.isEmpty(request.getDefaultRoleName())
                 && !request.getDefaultRoleName().equals(application.getDefaultUserRole().getRole())) {
-            Role role = roleService.getRoleByName(request.getDefaultRoleName());
+            Role role = roleService.getRoleByName(request.getDefaultRoleName().toUpperCase());
             application.setDefaultUserRole(role);
             defaultRoleUpdated = true;
         }
@@ -60,33 +55,9 @@ public class ApplicationService {
     }
 
     @Transactional
-    public Application removeUser(String uid, String identifier, boolean service) {
-        log.debug("Removing user: {} from application: {}", identifier, uid);
+    public Set<Role> getApplicationRoles(String uid) {
         Application application = getApplicationByUid(uid);
-        User dbUser = userService.getUserByName(identifier);
-        if (service) {
-            log.debug("Removing service user from application !");
-            application.getServiceUsers().remove(dbUser);
-        } else {
-            log.debug("Removing user from application !");
-            application.getUsers().remove(dbUser);
-        }
-        return applicationsRepository.save(application);
-    }
-
-    @Transactional
-    public Application addUser(String uid, String identifier, boolean service) {
-        log.debug("Adding user: {} to application: {}", identifier, uid);
-        Application application = getApplicationByUid(uid);
-        User dbUser = userService.getUserByName(identifier);
-        if (service) {
-            log.debug("Adding service user to application !");
-            application.getServiceUsers().add(dbUser);
-        } else {
-            log.debug("Adding user to application !");
-            application.getUsers().add(dbUser);
-        }
-        return applicationsRepository.save(application);
+        return application.getApplicationRoles();
     }
 
     private Application checkApplication(Application application) {
