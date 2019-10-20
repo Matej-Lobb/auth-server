@@ -17,7 +17,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class CreateUserRequest {
 
-    @NotNull
     @Email
     @NotNull(message = "'email' may not be null")
     private String email;

@@ -75,10 +75,10 @@
         </createTable>
 
         <insert tableName="users">
-            <column name="username" value="service1as2233asdas313254154adsa123a"/>
+            <column name="username" value="s1ecbr0b64d2"/>
             <column name="active" valueBoolean="true"/>
             <column name="email" value="matej.lobb@gmail.com"/>
-            <column name="password" value="$2a$06$aYrCcyuS/NMuActk7fwFZO0UZ2sBkg3KfswBWtfnIIKYlzxX5nJB."/>
+            <column name="password" value="$2a$06$kJQkJPMahNV6qX5nlfKMBuPUJjAZZcuyxbF5uArz9rrQw8DkxggGq"/>
         </insert>
 
         <insert tableName="user_roles">

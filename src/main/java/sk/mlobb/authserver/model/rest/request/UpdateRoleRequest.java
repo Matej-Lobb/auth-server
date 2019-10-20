@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Getter
@@ -14,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class UpdateRoleRequest {
 
+    @NotNull(message = "'permissions' may not be null")
     private Set<Permission> permissions;
 
     @Getter

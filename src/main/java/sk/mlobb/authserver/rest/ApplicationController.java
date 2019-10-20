@@ -39,6 +39,6 @@ public class ApplicationController {
         } else {
             restAuthenticationHandler.validateAccess(READ_ALL);
         }
-        return new ResponseEntity<>(applicationService.getByUid(uid), HttpStatus.OK);
+        return new ResponseEntity<>(applicationService.getApplicationByUid(uid), HttpStatus.OK);
     }
 }

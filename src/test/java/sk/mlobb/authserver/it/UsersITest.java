@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 public class UsersITest {
 
+    private static final String SERVICE_ACCOUNT_NAME = "s1ecbr0b64d2";
     private static final String APPLICATION_UID = "1s2a1x";
 
     @Autowired
@@ -42,7 +43,7 @@ public class UsersITest {
         // get user with create access
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        when(authentication.getPrincipal()).thenReturn("lobor");
+        when(authentication.getPrincipal()).thenReturn(SERVICE_ACCOUNT_NAME);
 
         CreateUserRequest createUserRequest = CreateUserRequest.builder()
                 .active(true)

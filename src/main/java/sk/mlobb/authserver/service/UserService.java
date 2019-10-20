@@ -186,7 +186,7 @@ public class UserService {
     }
 
     private Application checkIfApplicationExists(String applicationUid) {
-        final Application application = applicationService.getByUid(applicationUid);
+        final Application application = applicationService.getApplicationByUid(applicationUid);
         validateIfObjectExists(application == null, APPLICATION_NOT_EXISTS);
         return application;
     }
