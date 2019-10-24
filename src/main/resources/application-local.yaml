@@ -5,21 +5,3 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     username: auth-manager
     password: 091320f82ca9b5306548d221e7be52aaa8259fb4840458f2379e2b742518adea
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: validate
-    open-in-view: true
-  liquibase:
-    change-log: classpath:/db/liquibase-changelog.xml
-    enabled: true
-  jackson:
-    serialization:
-      FAIL_ON_EMPTY_BEANS: false
-
-server:
-  port: 9090
-
-logging:
-  level:
-    org.springframework.security: DEBUG

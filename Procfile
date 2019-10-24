@@ -1,1 +1,1 @@
-web: java -jar target/auth-server*.jar --server.port=$PORT
+web: java -jar -Dspring.profiles.active=heroku target/auth-server*.jar --server.port=$PORT

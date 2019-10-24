@@ -1,0 +1,7 @@
+spring:
+  profiles: heroku
+  datasource:
+    url: jdbc:mysql://ve8z40or2ccvdwur:xl0jtblwlkctatu7@zwgaqwfn759tj79r.chr7pe7iynqr.eu-west-1.rds.amazonaws.com:3306/dwqif714y5jjdoj1
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: ve8z40or2ccvdwur
+    password: xl0jtblwlkctatu7
