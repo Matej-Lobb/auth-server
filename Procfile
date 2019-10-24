@@ -1,1 +1,1 @@
-web: java -jar target/auth-server*.jar
+web: java -jar target/auth-server*.jar --server.port=80
