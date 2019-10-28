@@ -31,6 +31,7 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(final Authentication authentication) {
+        log.debug("Performing authentication ...");
         if (authentication.getName() == null || authentication.getCredentials() == null) {
             return null;
         }
