@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/auth-manager?requireSSL=true&useSSL=true
+    url: jdbc:mysql://db.mlobb.sk:3306/auth-manager?requireSSL=true&useSSL=true
     driverClassName: com.mysql.cj.jdbc.Driver
     username: auth-manager
-    password: 
+    password: 091320f82ca9b5306548d221e7be52aaa8259fb4840458f2379e2b742518adea
   jpa:
     show-sql: true
     hibernate:
