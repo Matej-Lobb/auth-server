@@ -1,0 +1,21 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:11-jdk
+    steps:
+      - checkout
+      - run: mvn clean compile
+      - run: mvn install jacoco:report
+      - store_artifacts:
+          path: target/be-rcon-1.2.0-SNAPSHOT.jar
+      - run:
+          name: Analyze on SonarCloud
+          command: mvn verify sonar:sonar
+      - run:
+          name: Analyze on Codecov
+          command: curl -s https://codecov.io/bash | bash -s
+      - run:
+          name: Analyze on Codacy
+          command: bash <(curl -Ls https://coverage.codacy.com/get.sh)
