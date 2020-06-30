@@ -25,6 +25,10 @@
 		<jacoco-maven-plugin-version>0.8.5</jacoco-maven-plugin-version>
 		<javax.mail.version>1.6.2</javax.mail.version>
 		<newrelic-java.version>5.8.0</newrelic-java.version>
+
+		<sonar.projectKey>mlobb_auth-server</sonar.projectKey>
+        	<sonar.organization>mlobb</sonar.organization>
+        	<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<dependencies>
