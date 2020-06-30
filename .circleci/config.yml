@@ -10,9 +10,3 @@ jobs:
       - run: mvn install jacoco:report
       - store_artifacts:
           path: target/auth-server-*.jar
-      - run:
-          name: Analyze on Codecov
-          command: curl -s https://codecov.io/bash | bash -s
-      - run:
-          name: Analyze on Codacy
-          command: bash <(curl -Ls https://coverage.codacy.com/get.sh)
