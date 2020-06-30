@@ -9,10 +9,7 @@ jobs:
       - run: mvn clean compile
       - run: mvn install jacoco:report
       - store_artifacts:
-          path: target/be-rcon-1.2.0-SNAPSHOT.jar
-      - run:
-          name: Analyze on SonarCloud
-          command: mvn verify sonar:sonar
+          path: target/auth-server-*.jar
       - run:
           name: Analyze on Codecov
           command: curl -s https://codecov.io/bash | bash -s
