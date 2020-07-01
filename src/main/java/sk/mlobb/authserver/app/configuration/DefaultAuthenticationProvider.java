@@ -5,14 +5,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import sk.mlobb.authserver.db.UsersRepository;
-import sk.mlobb.authserver.model.Role;
-import sk.mlobb.authserver.model.User;
+import sk.mlobb.authserver.model.RoleEntity;
+import sk.mlobb.authserver.model.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,39 +41,39 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
 
         boolean username = false;
         String identification = authentication.getName();
-        User user = usersRepository.findByEmailIgnoreCase(identification);
-        if (user == null) {
-            user = usersRepository.findByUsernameIgnoreCase(identification);
+        UserEntity userEntity = usersRepository.findByEmailIgnoreCase(identification);
+        if (userEntity == null) {
+            userEntity = usersRepository.findByUsernameIgnoreCase(identification);
             username = true;
-            validateObject(identification, user == null, "No user present with identification: %s");
+            validateObject(identification, userEntity == null, "No user present with identification: %s");
         }
 
-        validateObject(identification, Boolean.FALSE.equals(user.getActive()), "User %s is not active !");
+        validateObject(identification, Boolean.FALSE.equals(userEntity.getActive()), "User %s is not active !");
 
         final String providedUserIdentification = authentication.getName();
         final Object providedUserPassword = authentication.getCredentials();
 
-        String dbIdentification = getIdentification(username, user);
+        String dbIdentification = getIdentification(username, userEntity);
 
-        return validateCredentials(user, providedUserIdentification, providedUserPassword, dbIdentification);
+        return validateCredentials(userEntity, providedUserIdentification, providedUserPassword, dbIdentification);
     }
 
-    private Authentication validateCredentials(User user, String providedUserIdentification, Object providedUserPassword, String dbIdentification) {
+    private Authentication validateCredentials(UserEntity userEntity, String providedUserIdentification, Object providedUserPassword, String dbIdentification) {
         if (providedUserIdentification.equalsIgnoreCase(dbIdentification)
-                && passwordEncoder.matches(providedUserPassword.toString(), user.getPassword())) {
-            return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(),
-                    constructAuthorities(user));
+                && passwordEncoder.matches(providedUserPassword.toString(), userEntity.getPassword())) {
+            return new UsernamePasswordAuthenticationToken(userEntity.getUsername(), userEntity.getPassword(),
+                    constructAuthorities(userEntity));
         } else {
             throw new UsernameNotFoundException("Invalid username or password.");
         }
     }
 
-    private String getIdentification(boolean username, User user) {
+    private String getIdentification(boolean username, UserEntity userEntity) {
         String dbIdentification;
         if (username) {
-            dbIdentification = user.getUsername();
+            dbIdentification = userEntity.getUsername();
         } else {
-            dbIdentification = user.getEmail();
+            dbIdentification = userEntity.getEmail();
         }
         return dbIdentification;
     }
@@ -90,10 +89,10 @@ public class DefaultAuthenticationProvider implements AuthenticationProvider {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }
 
-    private List<GrantedAuthority> constructAuthorities(User user) {
+    private List<GrantedAuthority> constructAuthorities(UserEntity userEntity) {
         final List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        for (Role role : user.getRoles()) {
-            grantedAuthorities.add(new SimpleGrantedAuthority(role.getRole()));
+        for (RoleEntity roleEntity : userEntity.getRoles()) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(roleEntity.getRole()));
         }
         return grantedAuthorities;
     }

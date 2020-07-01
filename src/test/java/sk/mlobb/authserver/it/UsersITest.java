@@ -11,14 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.util.UriComponentsBuilder;
 import sk.mlobb.authserver.app.AuthServerApplication;
-import sk.mlobb.authserver.model.User;
+import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
+import sk.mlobb.authserver.model.rest.response.User;
 import sk.mlobb.authserver.rest.UserController;
 
 import java.time.LocalDate;
@@ -57,9 +56,7 @@ public class UsersITest {
                 .build();
 
         log.info("Creating user: {}", createUserRequest.toString());
-        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-        ResponseEntity<?> createUserResponse = userController.createUser(APPLICATION_UID, createUserRequest,
-                uriComponentsBuilder);
+        ResponseEntity<?> createUserResponse = userController.createUser(APPLICATION_UID, createUserRequest);
         log.info("Response: {}", createUserResponse);
         Assert.assertEquals(HttpStatus.CREATED, createUserResponse.getStatusCode());
 
@@ -67,16 +64,16 @@ public class UsersITest {
         when(authentication.getPrincipal()).thenReturn("test");
 
         log.info("Getting user: {}", createUserRequest.getUsername());
-        ResponseEntity<?> getUserResponse = userController.getUserByName(APPLICATION_UID,
+        ResponseEntity<User> getUserResponse = userController.getUserByName(APPLICATION_UID,
                 createUserRequest.getUsername());
         log.info("Response: {}", getUserResponse);
 
         Assert.assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
-        User user = (User) getUserResponse.getBody();
+        User user = getUserResponse.getBody();
         Assert.assertNotNull(user);
 
         log.info("Updating user: {}", user.getUsername());
-        ResponseEntity<?> updateUserResponse = userController.updateUserByUsername(APPLICATION_UID, user.getUsername(),
+        ResponseEntity<User> updateUserResponse = userController.updateUserByUsername(APPLICATION_UID, user.getUsername(),
                 UpdateUserRequest.builder()
                         .active(true)
                         .country("new")
@@ -93,7 +90,7 @@ public class UsersITest {
         log.info("Response: {}", updateUserResponse);
 
         Assert.assertEquals(HttpStatus.OK, updateUserResponse.getStatusCode());
-        user = (User) updateUserResponse.getBody();
+        user = updateUserResponse.getBody();
         Assert.assertNotNull(user);
         Assert.assertEquals("new", user.getCountry());
         Assert.assertEquals("new@new.sk", user.getEmail());
@@ -111,8 +108,8 @@ public class UsersITest {
         try {
             log.info("Getting user: {}", user.getUsername());
             userController.getUserByName(APPLICATION_UID, user.getUsername());
-        } catch (UsernameNotFoundException exception) {
-            Assert.assertEquals("User not exist in current context!", exception.getMessage());
+        } catch (NotFoundException exception) {
+            Assert.assertEquals("User not found", exception.getMessage());
             return;
         }
         Assert.fail();

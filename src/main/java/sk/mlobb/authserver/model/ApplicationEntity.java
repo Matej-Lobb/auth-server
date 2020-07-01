@@ -26,7 +26,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "applications")
-public class Application {
+public class ApplicationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,20 +40,20 @@ public class Application {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "default_role_id")
-    private Role defaultUserRole;
+    private RoleEntity defaultUserRoleEntity;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "application_users", joinColumns = @JoinColumn(name = "application_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> users;
+    private Set<UserEntity> userEntities;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "application_roles", joinColumns = @JoinColumn(name = "application_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> applicationRoles;
+    private Set<RoleEntity> applicationRoleEntities;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "application_service_users", joinColumns = @JoinColumn(name = "application_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> serviceUsers;
+    private Set<UserEntity> serviceUserEntities;
 }
