@@ -7,38 +7,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import sk.mlobb.authserver.model.annotation.DefaultPermission;
-import sk.mlobb.authserver.model.annotation.PermissionAlias;
-import sk.mlobb.authserver.rest.auth.RestAuthenticationHandler;
+import sk.mlobb.authserver.model.rest.response.Application;
 import sk.mlobb.authserver.service.ApplicationService;
-
-import static sk.mlobb.authserver.model.enums.RequiredAccess.READ_ALL;
-import static sk.mlobb.authserver.model.enums.RequiredAccess.READ_SELF;
 
 @Slf4j
 @RestController
 public class ApplicationController {
 
-    private final RestAuthenticationHandler restAuthenticationHandler;
     private final ApplicationService applicationService;
 
-    public ApplicationController(RestAuthenticationHandler restAuthenticationHandler,
-                                 ApplicationService applicationService) {
-        this.restAuthenticationHandler = restAuthenticationHandler;
+    public ApplicationController(ApplicationService applicationService) {
         this.applicationService = applicationService;
     }
 
-    @DefaultPermission
-    @PermissionAlias("get-application")
     @GetMapping(value = "/applications/{uid}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity getByName(@PathVariable("uid") String uid) {
-        if (restAuthenticationHandler.checkIfAccessingOwnApplicationData(uid)) {
-            restAuthenticationHandler.validateAccess(READ_SELF);
-        } else {
-            restAuthenticationHandler.validateAccess(READ_ALL);
-        }
-        return new ResponseEntity<>(applicationService.getByUid(uid), HttpStatus.OK);
+    public ResponseEntity<Application> getByName(@PathVariable("uid") String uid) {
+        return new ResponseEntity<>(applicationService.getApplication(uid), HttpStatus.OK);
     }
 }

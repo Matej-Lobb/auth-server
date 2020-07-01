@@ -11,8 +11,8 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CheckUserExistenceResponse {
+public class Role {
 
-    private Boolean usernameIsUnique;
-    private Boolean emailIsUnique;
+    private Long id;
+    private String roleName;
 }

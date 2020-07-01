@@ -4,7 +4,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet id="10-09-2019-1" author="Matej Lobb">
+    <changeSet id="1" author="Matej Lobb">
         <createTable tableName="oauth_client_details">
             <column name="client_id" type="VARCHAR(256)">
                 <constraints nullable="false" primaryKey="true"/>
@@ -51,9 +51,63 @@
             <column name="access_token_validity" valueNumeric="3600"/>
             <column name="refresh_token_validity" valueNumeric="2592000"/>
         </insert>
+
+        <createTable tableName="oauth_client_token">
+            <column name="token_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="LONGBLOB">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authentication_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="client_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="oauth_access_token">
+            <column name="token_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="LONGBLOB">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authentication_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="client_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authentication" type="LONGBLOB">
+                <constraints nullable="true"/>
+            </column>
+            <column name="refresh_token" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="oauth_refresh_token">
+            <column name="token_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="LONGBLOB">
+                <constraints nullable="true"/>
+            </column>
+            <column name="authentication" type="LONGBLOB">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
     </changeSet>
 
-    <changeSet id="10-09-2019-2" author="Matej Lobb">
+    <changeSet id="2" author="Matej Lobb">
         <createTable tableName="roles">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
@@ -62,55 +116,6 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-
-        <createTable tableName="permissions">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true"/>
-            </column>
-            <column name="method_name" type="varchar(50)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="controller" type="varchar(50)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="name_alias" type="varchar(50)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="annotation" type="varchar(50)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="read_all" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="read_self" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="write_all" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="write_self" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <createTable tableName="role_permissions">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true"/>
-            </column>
-            <column name="role_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="permission_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <addForeignKeyConstraint constraintName="role_permissions_permission_id_role_id"
-                                 baseTableName="role_permissions" baseColumnNames="role_id"
-                                 referencedTableName="roles" referencedColumnNames="id"/>
-        <addForeignKeyConstraint constraintName="role_permissions_role_id_permission_id"
-                                 baseTableName="role_permissions" baseColumnNames="permission_id"
-                                 referencedTableName="permissions" referencedColumnNames="id"/>
 
         <createTable tableName="users">
             <column name="id" type="BIGINT" autoIncrement="true">
@@ -211,45 +216,137 @@
             <column name="user_id" valueNumeric="1"/>
         </insert>
 
-        <createTable tableName="licenses">
+        <createTable tableName="applications">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="license" type="varchar(80)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="role_id" type="BIGINT">
+            <column name="name" type="VARCHAR(256)">
                 <constraints nullable="true"/>
             </column>
-            <column name="user_id" type="BIGINT">
+            <column name="uid" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="default_role_id" type="BIGINT">
                 <constraints nullable="true"/>
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseTableName="licenses"
-                                 baseColumnNames="role_id" constraintName="fk_licenses_role_id"
-                                 referencedColumnNames="id" referencedTableName="roles"/>
-        <addForeignKeyConstraint baseTableName="licenses"
-                                 baseColumnNames="user_id" constraintName="fk_licenses_user_id"
-                                 referencedColumnNames="id" referencedTableName="users"/>
+        <addForeignKeyConstraint baseColumnNames="default_role_id" baseTableName="applications"
+                                 constraintName="fk_applications_default_role_id" referencedColumnNames="id"
+                                 referencedTableName="roles"/>
 
-        <addColumn tableName="users">
-            <column name="license_id" type="BIGINT">
-                <constraints nullable="true"/>
+        <createTable tableName="application_users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
             </column>
-        </addColumn>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
 
-        <addForeignKeyConstraint baseTableName="users"
-                                 baseColumnNames="license_id" constraintName="fk_users_licenses_license_id"
-                                 referencedColumnNames="id" referencedTableName="licenses"/>
+        <addForeignKeyConstraint constraintName="application_users_application_id_user_id"
+                                 baseTableName="application_users" baseColumnNames="application_id"
+                                 referencedTableName="applications" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="application_users_user_id_application_id"
+                                 baseTableName="application_users" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"/>
 
-        <insert tableName="licenses">
-            <column name="license" value="ASDA-123AS-3123ASD-1234"/>
-            <column name="role_id" valueNumeric="1"/>
+        <createTable tableName="application_roles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="application_roles_application_id_user_id"
+                                 baseTableName="application_roles" baseColumnNames="application_id"
+                                 referencedTableName="applications" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="application_roles_role_id_application_id"
+                                 baseTableName="application_roles" baseColumnNames="role_id"
+                                 referencedTableName="roles" referencedColumnNames="id"/>
+
+        <createTable tableName="application_service_users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <insert tableName="users">
+            <column name="username" value="service1as2233asdas313254154adsa123a"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="email" value="matej.lobb@gmail.com"/>
+            <column name="password" value="$2a$06$aYrCcyuS/NMuActk7fwFZO0UZ2sBkg3KfswBWtfnIIKYlzxX5nJB."/>
         </insert>
 
-        <sql>
-            UPDATE users SET license_id = 1 where id = 1;
-        </sql>
+        <insert tableName="user_roles">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="role_id" valueNumeric="7"/>
+        </insert>
+
+        <addForeignKeyConstraint constraintName="application_service_users_application_id_user_id"
+                                 baseTableName="application_service_users" baseColumnNames="application_id"
+                                 referencedTableName="applications" referencedColumnNames="id"/>
+        <addForeignKeyConstraint constraintName="application_service_users_user_id_application_id"
+                                 baseTableName="application_service_users" baseColumnNames="user_id"
+                                 referencedTableName="users" referencedColumnNames="id"/>
+
+        <insert tableName="applications">
+            <column name="name" value="Test Application"/>
+            <column name="uid" value="1s2a1x"/>
+            <column name="default_role_id" valueNumeric="3"/>
+        </insert>
+
+        <insert tableName="application_users">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="user_id" valueNumeric="1"/>
+        </insert>
+
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="3"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="4"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="5"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="6"/>
+        </insert>
+        <insert tableName="application_roles">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="7"/>
+        </insert>
+
+        <insert tableName="application_service_users">
+            <column name="application_id" valueNumeric="1"/>
+            <column name="user_id" valueNumeric="2"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>

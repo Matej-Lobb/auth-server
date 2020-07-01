@@ -2,7 +2,7 @@ package sk.mlobb.authserver.service.mappers;
 
 import lombok.Builder;
 import lombok.Data;
-import sk.mlobb.authserver.model.User;
+import sk.mlobb.authserver.model.UserEntity;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
 
 @Data
@@ -10,5 +10,5 @@ import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
 public class UpdateUserWrapper {
 
     private UpdateUserRequest request;
-    private User user;
+    private UserEntity userEntity;
 }
