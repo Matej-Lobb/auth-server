@@ -4,10 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import sk.mlobb.authserver.model.rest.response.Application;
+import sk.mlobb.authserver.model.rest.Application;
 import sk.mlobb.authserver.service.ApplicationService;
 
 @Slf4j
@@ -23,7 +24,8 @@ public class ApplicationController {
     @GetMapping(value = "/applications/{uid}",
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Application> getByName(@PathVariable("uid") String uid) {
+    public ResponseEntity<Application> getByName(Authentication authentication, @PathVariable("uid") String uid) {
+        log.info("Getting application by uid: {}", uid);
         return new ResponseEntity<>(applicationService.getApplication(uid), HttpStatus.OK);
     }
 }

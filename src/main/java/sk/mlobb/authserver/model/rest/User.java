@@ -1,4 +1,4 @@
-package sk.mlobb.authserver.model.rest.response;
+package sk.mlobb.authserver.model.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

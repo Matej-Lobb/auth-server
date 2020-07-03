@@ -1,0 +1,64 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <changeSet author="matej (generated)" id="1">
+        <insert tableName="applications">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="Test Application"/>
+            <column name="uid" value="1s2a1x"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="id" valueNumeric="1"/>
+            <column name="role" value="ADMIN"/>
+            <column name="application_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="id" valueNumeric="2"/>
+            <column name="role" value="USER"/>
+            <column name="application_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="id" valueNumeric="3"/>
+            <column name="role" value="SERVICE"/>
+            <column name="application_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="matej (generated)" id="2">
+        <update tableName="applications">
+            <column name="default_role_id" value="2"/>
+            <where>id=1</where>
+        </update>
+        <insert tableName="users">
+            <column name="id" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="country" value="Slovakia"/>
+            <column name="dob"/>
+            <column name="email" value="matej.lobb@gmail.com"/>
+            <column name="first_name" value="Admin"/>
+            <column name="keep_updated" valueBoolean="true"/>
+            <column name="last_name" value="Admin"/>
+            <column name="password" value="$2a$06$aYrCcyuS/NMuActk7fwFZO0UZ2sBkg3KfswBWtfnIIKYlzxX5nJB."/>
+            <column name="profile_picture"/>
+            <column name="username" value="lobor"/>
+            <column name="application_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet author="matej (generated)" id="3">
+        <insert tableName="user_roles">
+            <column name="id" valueNumeric="1"/>
+            <column name="user_id" valueNumeric="1"/>
+            <column name="role_id" valueNumeric="3"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="matej (generated)" id="4">
+        <insert tableName="oauth_client_details">
+            <column name="client_id" value="091320fasda123saadaa8259fb484021313123ASDAasd2134asDA2518adea"/>
+            <column name="client_secret" value="$2a$10$6.RP85jfZFkrorNWI1ZWZ.Dp4nEUi8z8o7332QHUlbD2pSOfz57Uy"/>
+            <column name="scope" value="read,write,trust"/>
+            <column name="authorized_grant_types"
+                    value="authorization_code,implicit,password,client_credentials,refresh_token"/>
+            <column name="access_token_validity" valueNumeric="3600"/>
+            <column name="refresh_token_validity" valueNumeric="2592000"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

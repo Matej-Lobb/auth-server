@@ -17,7 +17,7 @@ import sk.mlobb.authserver.app.AuthServerApplication;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
-import sk.mlobb.authserver.model.rest.response.User;
+import sk.mlobb.authserver.model.rest.User;
 import sk.mlobb.authserver.rest.UserController;
 
 import java.time.LocalDate;

@@ -18,17 +18,16 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "application_users")
-public class ApplicationUser implements Serializable {
+@Table(name = "user_roles")
+public class UserRoleEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
     private Long id;
-
-    @Column(name = "application_id")
-    private Long applicationId;
 
     @Column(name = "user_id")
     private Long userId;
+
+    @Column(name = "role_id")
+    private Long userRoleId;
 }

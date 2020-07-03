@@ -7,7 +7,7 @@ import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
 import sk.mlobb.authserver.model.UserEntity;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
-import sk.mlobb.authserver.model.rest.response.User;
+import sk.mlobb.authserver.model.rest.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

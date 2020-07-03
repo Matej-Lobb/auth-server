@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
-import sk.mlobb.authserver.model.rest.response.User;
+import sk.mlobb.authserver.model.rest.User;
 import sk.mlobb.authserver.service.UserService;
 
 import javax.validation.Valid;

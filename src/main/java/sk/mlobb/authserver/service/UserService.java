@@ -6,18 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sk.mlobb.authserver.db.ApplicationUsersRepository;
 import sk.mlobb.authserver.db.RolesRepository;
 import sk.mlobb.authserver.db.UsersRepository;
 import sk.mlobb.authserver.model.ApplicationEntity;
-import sk.mlobb.authserver.model.ApplicationUser;
 import sk.mlobb.authserver.model.RoleEntity;
 import sk.mlobb.authserver.model.UserEntity;
 import sk.mlobb.authserver.model.exception.ConflictException;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
-import sk.mlobb.authserver.model.rest.response.User;
+import sk.mlobb.authserver.model.rest.User;
 import sk.mlobb.authserver.service.mappers.UpdateUserWrapper;
 import sk.mlobb.authserver.service.mappers.UserMapper;
 
@@ -35,7 +33,6 @@ public class UserService {
     private static final String APPLICATION_NOT_EXISTS = "Application not exists !";
     private static final String USER_NOT_FOUND = "User not found";
 
-    private final ApplicationUsersRepository applicationUsersRepository;
     private final ApplicationService applicationService;
     private final UsersRepository usersRepository;
     private final RolesRepository rolesRepository;
@@ -44,9 +41,7 @@ public class UserService {
 
     @Autowired
     public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
-                       ApplicationService applicationService, ApplicationUsersRepository applicationUsersRepository,
-                       RolesRepository rolesRepository) {
-        this.applicationUsersRepository = applicationUsersRepository;
+                       ApplicationService applicationService, RolesRepository rolesRepository) {
         this.applicationService = applicationService;
         this.rolesRepository = rolesRepository;
         this.usersRepository = usersRepository;
@@ -111,7 +106,6 @@ public class UserService {
         UserEntity userEntity = usersRepository.findByUsernameIgnoreCase(username);
         validateIfObjectExists(userEntity == null, USER_NOT_FOUND);
 
-        applicationUsersRepository.deleteByUserId(userEntity.getId());
         usersRepository.deleteById(userEntity.getId());
     }
 
@@ -132,11 +126,10 @@ public class UserService {
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         Set<RoleEntity> roleEntities = new HashSet<>();
         roleEntities.add(applicationEntity.getDefaultUserRoleEntity());
+        userEntity.setId(0L);
         userEntity.setRoles(roleEntities);
-        UserEntity dbUserEntity = usersRepository.save(userEntity);
-        applicationUsersRepository.save(ApplicationUser.builder().applicationId(applicationEntity.getId())
-                .userId(dbUserEntity.getId()).build());
-        return dbUserEntity;
+        userEntity.setApplicationEntity(applicationEntity);
+        return usersRepository.save(userEntity);
     }
 
     private void checkRolesChange(UpdateUserRequest updateUserRequest, UserEntity oldUserEntity) {

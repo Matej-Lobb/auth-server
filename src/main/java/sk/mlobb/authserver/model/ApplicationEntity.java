@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,9 +14,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.Set;
 
@@ -42,18 +42,9 @@ public class ApplicationEntity {
     @JoinColumn(name = "default_role_id")
     private RoleEntity defaultUserRoleEntity;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "application_users", joinColumns = @JoinColumn(name = "application_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @OneToMany(mappedBy = "applicationEntity",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<UserEntity> userEntities;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "application_roles", joinColumns = @JoinColumn(name = "application_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @OneToMany(mappedBy = "applicationEntity",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<RoleEntity> applicationRoleEntities;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "application_service_users", joinColumns = @JoinColumn(name = "application_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<UserEntity> serviceUserEntities;
 }

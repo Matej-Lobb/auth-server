@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sk.mlobb.authserver.db.ApplicationsRepository;
 import sk.mlobb.authserver.model.ApplicationEntity;
-import sk.mlobb.authserver.model.rest.response.Application;
+import sk.mlobb.authserver.model.rest.Application;
 import sk.mlobb.authserver.service.mappers.ApplicationMapper;
 
 @Slf4j
