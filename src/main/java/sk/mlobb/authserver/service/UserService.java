@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sk.mlobb.authserver.db.RolesRepository;
+import sk.mlobb.authserver.db.UserRolesRepository;
 import sk.mlobb.authserver.db.UsersRepository;
 import sk.mlobb.authserver.model.ApplicationEntity;
 import sk.mlobb.authserver.model.RoleEntity;
@@ -49,12 +50,14 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
+    @Transactional
     public List<User> getAllUsers(String applicationUid) {
         log.debug("Getting all users from database.");
         ApplicationEntity applicationEntity = checkIfApplicationExists(applicationUid);
         return userMapper.mapAllUsers(applicationEntity.getUserEntities());
     }
 
+    @Transactional
     public User getUserByName(String applicationUid, String identifier) {
         log.debug("Get user by identifier: {}", identifier);
 
@@ -69,6 +72,7 @@ public class UserService {
         return userMapper.mapUser(userEntity);
     }
 
+    @Transactional
     public User createUser(String applicationUid, CreateUserRequest createUserRequest) {
         log.debug("Creating user: {}", createUserRequest.getUsername());
 
@@ -79,6 +83,7 @@ public class UserService {
         return userMapper.mapUser(userEntity);
     }
 
+    @Transactional
     public User updateUserByUsername(String applicationUid, String existingUsername,
                                      UpdateUserRequest updateUserRequest, boolean canChangeRole) {
         log.debug("Updating user with username: {} ", existingUsername);
@@ -98,6 +103,7 @@ public class UserService {
         return userMapper.mapUser(updateUser);
     }
 
+    @Transactional
     public void deleteUserByUsername(String applicationUid, String username) {
         log.debug("Deleting User with username {}", username);
 
@@ -129,7 +135,7 @@ public class UserService {
         userEntity.setId(0L);
         userEntity.setRoles(roleEntities);
         userEntity.setApplicationEntity(applicationEntity);
-        return usersRepository.save(userEntity);
+        return usersRepository.saveAndFlush(userEntity);
     }
 
     private void checkRolesChange(UpdateUserRequest updateUserRequest, UserEntity oldUserEntity) {

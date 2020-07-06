@@ -61,10 +61,10 @@
 
     <changeSet author="matej (generated)" id="3">
         <createTable tableName="user_roles">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false"/>
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column autoIncrement="true" name="user_id" type="BIGINT">
+            <column name="user_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="role_id" type="BIGINT">
