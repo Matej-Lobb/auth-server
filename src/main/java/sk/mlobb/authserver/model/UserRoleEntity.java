@@ -30,4 +30,13 @@ public class UserRoleEntity implements Serializable {
 
     @Column(name = "role_id")
     private Long userRoleId;
+
+    @Override
+    public String toString() {
+        return "UserRoleEntity{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", userRoleId=" + userRoleId +
+                '}';
+    }
 }

@@ -35,7 +35,6 @@ public interface UserMapper {
     @Mapping(target = "roles", source = "updateUserWrapper.userEntity.roles")
     @Mapping(target = "username", source = "updateUserWrapper.userEntity.username")
     @Mapping(target = "password", source = "updateUserWrapper.userEntity.password")
-    @Mapping(target = "applicationEntity", source = "updateUserWrapper.userEntity.applicationEntity")
     @Mapping(target = "active", source = "updateUserWrapper", qualifiedByName = "mapActive")
     @Mapping(target = "keepUpdated", source = "updateUserWrapper", qualifiedByName = "mapKeepUpdated")
     @Mapping(target = "profilePicture", source = "updateUserWrapper", qualifiedByName = "mapProfilePicture")

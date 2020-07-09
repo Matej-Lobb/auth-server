@@ -65,7 +65,7 @@ public class UserController {
                                      @PathVariable("identifier") String identifier,
                                      @Valid @RequestBody UpdateUserRequest updateUserRequest) {
             return ResponseEntity.ok(userService.updateUserByUsername(applicationUid, identifier, updateUserRequest,
-                    false));
+                    true));
     }
 
     @DeleteMapping(value = {"/applications/{applicationUid}/users/{identifier}"},

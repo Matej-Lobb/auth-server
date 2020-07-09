@@ -15,14 +15,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import sk.mlobb.authserver.app.AuthServerApplication;
 import sk.mlobb.authserver.model.exception.NotFoundException;
+import sk.mlobb.authserver.model.rest.User;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
-import sk.mlobb.authserver.model.rest.User;
 import sk.mlobb.authserver.rest.UserController;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
 
+import static org.awaitility.Awaitility.with;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -60,7 +62,6 @@ public class UsersITest {
         log.info("Response: {}", createUserResponse);
         Assert.assertEquals(HttpStatus.CREATED, createUserResponse.getStatusCode());
 
-        // get created user
         when(authentication.getPrincipal()).thenReturn("test");
 
         log.info("Getting user: {}", createUserRequest.getUsername());
@@ -96,22 +97,26 @@ public class UsersITest {
         Assert.assertEquals("new@new.sk", user.getEmail());
         Assert.assertEquals("new", user.getFirstName());
         Assert.assertEquals("new", user.getLastName());
-        Assert.assertEquals(1, user.getRoles().size());
+        Assert.assertEquals(2, user.getRoles().size());
         Assert.assertFalse(user.getKeepUpdated());
         Assert.assertNotNull(user.getPassword());
 
-        log.info("Deleting user: {}", user.getUsername());
-        ResponseEntity<?> deleteUserResponse = userController.deleteUserByName(APPLICATION_UID, user.getUsername());
+        final String username = user.getUsername();
+        log.info("Deleting user: {}", username);
+        ResponseEntity<?> deleteUserResponse = userController.deleteUserByName(APPLICATION_UID, username);
         Assert.assertEquals(HttpStatus.OK, deleteUserResponse.getStatusCode());
         log.info("Response: {}", deleteUserResponse);
 
-        try {
-            log.info("Getting user: {}", user.getUsername());
-            userController.getUserByName(APPLICATION_UID, user.getUsername());
-        } catch (NotFoundException exception) {
-            Assert.assertEquals("User not found", exception.getMessage());
-            return;
-        }
-        Assert.fail();
+        with().pollInterval(Duration.ofSeconds(5)).and().with().pollDelay(Duration.ofSeconds(1)).await()
+                .atMost(Duration.ofSeconds(30)).until(() -> {
+            try {
+                log.info("Getting user: {}", username);
+                userController.getUserByName(APPLICATION_UID, username);
+                return false;
+            } catch (NotFoundException exception) {
+                Assert.assertEquals("User not found", exception.getMessage());
+                return true;
+            }
+        });
     }
 }

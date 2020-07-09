@@ -6,17 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sk.mlobb.authserver.db.ApplicationsRepository;
 import sk.mlobb.authserver.db.RolesRepository;
-import sk.mlobb.authserver.db.UserRolesRepository;
 import sk.mlobb.authserver.db.UsersRepository;
 import sk.mlobb.authserver.model.ApplicationEntity;
 import sk.mlobb.authserver.model.RoleEntity;
 import sk.mlobb.authserver.model.UserEntity;
 import sk.mlobb.authserver.model.exception.ConflictException;
 import sk.mlobb.authserver.model.exception.NotFoundException;
+import sk.mlobb.authserver.model.rest.User;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
-import sk.mlobb.authserver.model.rest.User;
 import sk.mlobb.authserver.service.mappers.UpdateUserWrapper;
 import sk.mlobb.authserver.service.mappers.UserMapper;
 
@@ -28,12 +28,12 @@ import java.util.Set;
 
 @Slf4j
 @Service
-@Transactional
 public class UserService {
 
     private static final String APPLICATION_NOT_EXISTS = "Application not exists !";
     private static final String USER_NOT_FOUND = "User not found";
 
+    private final ApplicationsRepository applicationsRepository;
     private final ApplicationService applicationService;
     private final UsersRepository usersRepository;
     private final RolesRepository rolesRepository;
@@ -41,8 +41,10 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Autowired
-    public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
-                       ApplicationService applicationService, RolesRepository rolesRepository) {
+    public UserService(ApplicationsRepository applicationsRepository, UsersRepository usersRepository,
+                       PasswordEncoder passwordEncoder, UserMapper userMapper, ApplicationService applicationService,
+                       RolesRepository rolesRepository) {
+        this.applicationsRepository = applicationsRepository;
         this.applicationService = applicationService;
         this.rolesRepository = rolesRepository;
         this.usersRepository = usersRepository;
@@ -61,7 +63,7 @@ public class UserService {
     public User getUserByName(String applicationUid, String identifier) {
         log.debug("Get user by identifier: {}", identifier);
 
-        checkIfUserIsPartOfApplication(applicationUid, identifier);
+        checkIfUserIsPartOfApplication(checkIfApplicationExists(applicationUid), identifier);
 
         UserEntity userEntity;
         if (isValidEmailAddress(identifier)) {
@@ -88,7 +90,7 @@ public class UserService {
                                      UpdateUserRequest updateUserRequest, boolean canChangeRole) {
         log.debug("Updating user with username: {} ", existingUsername);
 
-        checkIfUserIsPartOfApplication(applicationUid, existingUsername);
+        checkIfUserIsPartOfApplication(checkIfApplicationExists(applicationUid), existingUsername);
 
         final UserEntity oldUserEntity = usersRepository.findByUsernameIgnoreCase(existingUsername);
         validateIfObjectExists(oldUserEntity == null, USER_NOT_FOUND);
@@ -107,14 +109,23 @@ public class UserService {
     public void deleteUserByUsername(String applicationUid, String username) {
         log.debug("Deleting User with username {}", username);
 
-        checkIfUserIsPartOfApplication(applicationUid, username);
-
+        ApplicationEntity applicationEntity = checkIfApplicationExists(applicationUid);
+        checkIfUserIsPartOfApplication(applicationEntity, username);
         UserEntity userEntity = usersRepository.findByUsernameIgnoreCase(username);
         validateIfObjectExists(userEntity == null, USER_NOT_FOUND);
 
-        usersRepository.deleteById(userEntity.getId());
+        userEntity.getRoles().clear();
+        usersRepository.saveAndFlush(userEntity);
+
+        UserEntity userInApplication = findUserInApplication(applicationEntity.getUserEntities(),
+                userEntity.getUsername());
+        applicationEntity.getUserEntities().remove(userInApplication);
+        applicationsRepository.saveAndFlush(applicationEntity);
+
+        usersRepository.delete(userEntity);
     }
 
+    @Transactional
     public UserEntity getUserByName(String identifier) {
         log.debug("Get user by identifier: {}", identifier);
         if (isValidEmailAddress(identifier)) {
@@ -124,18 +135,25 @@ public class UserService {
         }
     }
 
-    public void checkIfUserIsPartOfApplication(String uid, String identifier) {
-        checkIfUserIsPartOfApplication(checkIfApplicationExists(uid), identifier);
-    }
-
     private UserEntity createUser(UserEntity userEntity, ApplicationEntity applicationEntity) {
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         Set<RoleEntity> roleEntities = new HashSet<>();
         roleEntities.add(applicationEntity.getDefaultUserRoleEntity());
-        userEntity.setId(0L);
         userEntity.setRoles(roleEntities);
-        userEntity.setApplicationEntity(applicationEntity);
-        return usersRepository.saveAndFlush(userEntity);
+
+        applicationEntity.getUserEntities().add(userEntity);
+        ApplicationEntity updateApplication = applicationsRepository.save(applicationEntity);
+        return usersRepository.saveAndFlush(findUserInApplication(updateApplication.getUserEntities(),
+                userEntity.getUsername()));
+    }
+
+    private UserEntity findUserInApplication(Set<UserEntity> userEntities, String username) {
+        for (UserEntity userEntity : userEntities) {
+            if (userEntity.getUsername().equals(username)){
+                return userEntity;
+            }
+        }
+        throw new NotFoundException("User not found in application !");
     }
 
     private void checkRolesChange(UpdateUserRequest updateUserRequest, UserEntity oldUserEntity) {

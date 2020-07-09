@@ -59,6 +59,7 @@
                     value="authorization_code,implicit,password,client_credentials,refresh_token"/>
             <column name="access_token_validity" valueNumeric="3600"/>
             <column name="refresh_token_validity" valueNumeric="2592000"/>
+            <column name="autoapprove" valueBoolean="true"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

@@ -26,6 +26,7 @@
 		<javax.mail.version>1.6.2</javax.mail.version>
 		<validation-api-version>2.0.1.Final</validation-api-version>
 		<springfox-swagger2-version>2.9.2</springfox-swagger2-version>
+		<awaitility-version>4.0.3</awaitility-version>
 	</properties>
 
 	<dependencies>
@@ -146,6 +147,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>${awaitility-version}</version>
 		</dependency>
 	</dependencies>
 

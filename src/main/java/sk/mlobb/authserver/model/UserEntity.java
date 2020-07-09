@@ -19,6 +19,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDate;
 import java.util.Set;
@@ -68,12 +69,9 @@ public class UserEntity {
     @Column(name = "profile_picture")
     private byte[] profilePicture;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "application_id")
-    private ApplicationEntity applicationEntity;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"),
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RoleEntity> roles;
 }

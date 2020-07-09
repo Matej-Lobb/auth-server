@@ -30,8 +30,4 @@ public class RoleEntity {
 
     @Column(name="role")
     private String role;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "application_id")
-    private ApplicationEntity applicationEntity;
 }

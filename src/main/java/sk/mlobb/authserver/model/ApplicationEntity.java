@@ -42,9 +42,11 @@ public class ApplicationEntity {
     @JoinColumn(name = "default_role_id")
     private RoleEntity defaultUserRoleEntity;
 
-    @OneToMany(mappedBy = "applicationEntity",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "application_id")
     private Set<UserEntity> userEntities;
 
-    @OneToMany(mappedBy = "applicationEntity",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "application_id")
     private Set<RoleEntity> applicationRoleEntities;
 }
