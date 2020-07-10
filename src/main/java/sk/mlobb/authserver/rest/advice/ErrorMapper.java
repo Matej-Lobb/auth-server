@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import sk.mlobb.authserver.model.error.ErrorResponse;
 import sk.mlobb.authserver.model.exception.ConflictException;
 import sk.mlobb.authserver.model.exception.InvalidRequestException;
+import sk.mlobb.authserver.model.exception.NoContentException;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.exception.UnauthorizedException;
 
@@ -43,6 +44,13 @@ public class ErrorMapper {
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDuplicateException(HttpServletRequest request, ConflictException exception) {
+        log.info(ERROR_MESSAGE, exception.getMessage());
+        return ErrorResponse.builder().info(exception.getMessage()).build();
+    }
+
+    @ExceptionHandler(NoContentException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ErrorResponse handleDuplicateException(HttpServletRequest request, NoContentException exception) {
         log.info(ERROR_MESSAGE, exception.getMessage());
         return ErrorResponse.builder().info(exception.getMessage()).build();
     }

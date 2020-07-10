@@ -25,7 +25,7 @@ public class ApplicationService {
         return mapper.mapApplication(getApplicationByUid(applicationUid));
     }
 
-    ApplicationEntity getApplicationByUid(String applicationUid) {
+    protected ApplicationEntity getApplicationByUid(String applicationUid) {
         log.debug("Getting Application by uid {} !", applicationUid);
         return applicationsRepository.findByUid(applicationUid);
     }

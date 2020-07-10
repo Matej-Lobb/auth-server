@@ -31,7 +31,7 @@ public class RoleService {
     @Transactional
     public RoleEntity getRoleByName(String role) {
         log.debug("Getting role: {}", role);
-        RoleEntity dbRoleEntity = rolesRepository.findByRole(role);
+        final RoleEntity dbRoleEntity = rolesRepository.findByRole(role);
         if (dbRoleEntity == null) {
             throw new NotFoundException("Role not found !");
         }
@@ -41,7 +41,7 @@ public class RoleService {
     @Transactional
     public void updateRole(String role, UpdateRoleRequest updateRoleRequest) {
         log.debug("Updating role: {}", role);
-        RoleEntity dbRoleEntity = roleMapper.mapUpdateRole(UpdateRoleWrapper.builder().roleEntity(getRoleByName(role))
+        final RoleEntity dbRoleEntity = roleMapper.mapUpdateRole(UpdateRoleWrapper.builder().roleEntity(getRoleByName(role))
                 .request(updateRoleRequest).build());
         rolesRepository.save(dbRoleEntity);
     }
@@ -49,7 +49,7 @@ public class RoleService {
     @Transactional
     public void deleteRole(String roleName) {
         log.debug("Deleting role: {}", roleName);
-        RoleEntity roleEntity = getRoleByName(roleName);
+        final RoleEntity roleEntity = getRoleByName(roleName);
         rolesRepository.delete(roleEntity);
     }
 }

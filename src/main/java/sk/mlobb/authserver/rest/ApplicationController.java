@@ -1,9 +1,6 @@
 package sk.mlobb.authserver.rest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,11 +18,9 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    @GetMapping(value = "/applications/{uid}",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Application> getByName(Authentication authentication, @PathVariable("uid") String uid) {
+    @GetMapping(value = "/applications/{uid}")
+    public Application getByName(Authentication authentication, @PathVariable("uid") String uid) {
         log.info("Getting application by uid: {}", uid);
-        return new ResponseEntity<>(applicationService.getApplication(uid), HttpStatus.OK);
+        return applicationService.getApplication(uid);
     }
 }

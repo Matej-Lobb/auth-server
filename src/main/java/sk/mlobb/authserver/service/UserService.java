@@ -13,6 +13,7 @@ import sk.mlobb.authserver.model.ApplicationEntity;
 import sk.mlobb.authserver.model.RoleEntity;
 import sk.mlobb.authserver.model.UserEntity;
 import sk.mlobb.authserver.model.exception.ConflictException;
+import sk.mlobb.authserver.model.exception.NoContentException;
 import sk.mlobb.authserver.model.exception.NotFoundException;
 import sk.mlobb.authserver.model.rest.User;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
@@ -55,8 +56,12 @@ public class UserService {
     @Transactional
     public List<User> getAllUsers(String applicationUid) {
         log.debug("Getting all users from database.");
-        ApplicationEntity applicationEntity = checkIfApplicationExists(applicationUid);
-        return userMapper.mapAllUsers(applicationEntity.getUserEntities());
+        final ApplicationEntity applicationEntity = checkIfApplicationExists(applicationUid);
+        final List<User> users = userMapper.mapAllUsers(applicationEntity.getUserEntities());
+        if (users.isEmpty()) {
+            throw new NoContentException();
+        }
+        return users;
     }
 
     @Transactional
@@ -79,9 +84,9 @@ public class UserService {
         log.debug("Creating user: {}", createUserRequest.getUsername());
 
         validateUserData(createUserRequest.getUsername(), createUserRequest.getEmail());
-        ApplicationEntity applicationEntity = checkIfApplicationExists(applicationUid);
+        final ApplicationEntity applicationEntity = checkIfApplicationExists(applicationUid);
 
-        UserEntity userEntity = createUser(userMapper.mapCreateUser(createUserRequest), applicationEntity);
+        final UserEntity userEntity = createUser(userMapper.mapCreateUser(createUserRequest), applicationEntity);
         return userMapper.mapUser(userEntity);
     }
 
@@ -99,9 +104,8 @@ public class UserService {
         if (canChangeRole) {
             checkRolesChange(updateUserRequest, oldUserEntity);
         }
-        UserEntity updatedUserEntity = userMapper.mapUpdateUser(UpdateUserWrapper.builder().userEntity(oldUserEntity)
-                .request(updateUserRequest).build());
-        UserEntity updateUser = usersRepository.save(updatedUserEntity);
+        final UserEntity updateUser = usersRepository.save(userMapper.mapUpdateUser(UpdateUserWrapper.builder()
+                .userEntity(oldUserEntity).request(updateUserRequest).build()));
         return userMapper.mapUser(updateUser);
     }
 
@@ -109,17 +113,16 @@ public class UserService {
     public void deleteUserByUsername(String applicationUid, String username) {
         log.debug("Deleting User with username {}", username);
 
-        ApplicationEntity applicationEntity = checkIfApplicationExists(applicationUid);
+        final ApplicationEntity applicationEntity = checkIfApplicationExists(applicationUid);
         checkIfUserIsPartOfApplication(applicationEntity, username);
-        UserEntity userEntity = usersRepository.findByUsernameIgnoreCase(username);
+        final UserEntity userEntity = usersRepository.findByUsernameIgnoreCase(username);
         validateIfObjectExists(userEntity == null, USER_NOT_FOUND);
 
         userEntity.getRoles().clear();
         usersRepository.saveAndFlush(userEntity);
 
-        UserEntity userInApplication = findUserInApplication(applicationEntity.getUserEntities(),
-                userEntity.getUsername());
-        applicationEntity.getUserEntities().remove(userInApplication);
+        applicationEntity.getUserEntities().remove(findUserInApplication(applicationEntity.getUserEntities(),
+                userEntity.getUsername()));
         applicationsRepository.saveAndFlush(applicationEntity);
 
         usersRepository.delete(userEntity);
@@ -137,14 +140,13 @@ public class UserService {
 
     private UserEntity createUser(UserEntity userEntity, ApplicationEntity applicationEntity) {
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
-        Set<RoleEntity> roleEntities = new HashSet<>();
+        final Set<RoleEntity> roleEntities = new HashSet<>();
         roleEntities.add(applicationEntity.getDefaultUserRoleEntity());
         userEntity.setRoles(roleEntities);
 
         applicationEntity.getUserEntities().add(userEntity);
-        ApplicationEntity updateApplication = applicationsRepository.save(applicationEntity);
-        return usersRepository.saveAndFlush(findUserInApplication(updateApplication.getUserEntities(),
-                userEntity.getUsername()));
+        return usersRepository.saveAndFlush(findUserInApplication(applicationsRepository.save(applicationEntity)
+                        .getUserEntities(), userEntity.getUsername()));
     }
 
     private UserEntity findUserInApplication(Set<UserEntity> userEntities, String username) {
@@ -158,7 +160,7 @@ public class UserService {
 
     private void checkRolesChange(UpdateUserRequest updateUserRequest, UserEntity oldUserEntity) {
         if (updateUserRequest.getRoles() != null && !updateUserRequest.getRoles().isEmpty()) {
-            Set<RoleEntity> finalRoleEntities = new HashSet<>();
+            final Set<RoleEntity> finalRoleEntities = new HashSet<>();
             for (String role : updateUserRequest.getRoles()) {
                 RoleEntity dbRoleEntity = rolesRepository.findByRole(role);
                 validateIfObjectExists(dbRoleEntity == null, String.format("Role: %s not found !", role));
@@ -188,12 +190,9 @@ public class UserService {
     }
 
     private void checkIfUserIsPartOfApplication(ApplicationEntity applicationEntity, String identifier) {
-        Set<UserEntity> userEntities = applicationEntity.getUserEntities();
-        UserEntity dbUserEntity = getUserByName(identifier);
-
         boolean isInCorrectApplication = false;
-        for (UserEntity userEntity : userEntities) {
-            if (userEntity.getId().equals(dbUserEntity.getId())) {
+        for (UserEntity userEntity : applicationEntity.getUserEntities()) {
+            if (userEntity.getId().equals(getUserByName(identifier).getId())) {
                 isInCorrectApplication = true;
                 break;
             }
@@ -209,12 +208,12 @@ public class UserService {
     }
 
     private void validateUserData(String requestUsername, String requestEmail) {
-        boolean username = usersRepository.findByUsernameIgnoreCase(requestUsername) != null;
-        if (username) {
+        final boolean isUsername = usersRepository.findByUsernameIgnoreCase(requestUsername) != null;
+        if (isUsername) {
             throw new ConflictException(String.format("A user with name %s already exist", requestUsername));
         }
-        boolean email = usersRepository.findByEmailIgnoreCase(requestEmail) != null;
-        if (email) {
+        boolean isEmail = usersRepository.findByEmailIgnoreCase(requestEmail) != null;
+        if (isEmail) {
             throw new ConflictException(String.format("A user with email %s already exist", requestEmail));
         }
     }

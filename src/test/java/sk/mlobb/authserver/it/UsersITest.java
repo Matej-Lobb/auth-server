@@ -1,14 +1,11 @@
 package sk.mlobb.authserver.it;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
@@ -27,7 +24,6 @@ import java.util.HashSet;
 import static org.awaitility.Awaitility.with;
 import static org.mockito.Mockito.when;
 
-@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AuthServerApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -57,24 +53,15 @@ public class UsersITest {
                 .username("test")
                 .build();
 
-        log.info("Creating user: {}", createUserRequest.toString());
-        ResponseEntity<?> createUserResponse = userController.createUser(APPLICATION_UID, createUserRequest);
-        log.info("Response: {}", createUserResponse);
-        Assert.assertEquals(HttpStatus.CREATED, createUserResponse.getStatusCode());
+        userController.createUser(APPLICATION_UID, createUserRequest);
 
         when(authentication.getPrincipal()).thenReturn("test");
 
-        log.info("Getting user: {}", createUserRequest.getUsername());
-        ResponseEntity<User> getUserResponse = userController.getUserByName(APPLICATION_UID,
+        User user = userController.getUserByName(APPLICATION_UID,
                 createUserRequest.getUsername());
-        log.info("Response: {}", getUserResponse);
-
-        Assert.assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
-        User user = getUserResponse.getBody();
         Assert.assertNotNull(user);
 
-        log.info("Updating user: {}", user.getUsername());
-        ResponseEntity<User> updateUserResponse = userController.updateUserByUsername(APPLICATION_UID, user.getUsername(),
+        user = userController.updateUserByUsername(APPLICATION_UID, user.getUsername(),
                 UpdateUserRequest.builder()
                         .active(true)
                         .country("new")
@@ -88,10 +75,7 @@ public class UsersITest {
                             add("ADMIN");
                         }})
                         .build());
-        log.info("Response: {}", updateUserResponse);
 
-        Assert.assertEquals(HttpStatus.OK, updateUserResponse.getStatusCode());
-        user = updateUserResponse.getBody();
         Assert.assertNotNull(user);
         Assert.assertEquals("new", user.getCountry());
         Assert.assertEquals("new@new.sk", user.getEmail());
@@ -102,15 +86,11 @@ public class UsersITest {
         Assert.assertNotNull(user.getPassword());
 
         final String username = user.getUsername();
-        log.info("Deleting user: {}", username);
-        ResponseEntity<?> deleteUserResponse = userController.deleteUserByName(APPLICATION_UID, username);
-        Assert.assertEquals(HttpStatus.OK, deleteUserResponse.getStatusCode());
-        log.info("Response: {}", deleteUserResponse);
+        userController.deleteUserByName(APPLICATION_UID, username);
 
         with().pollInterval(Duration.ofSeconds(5)).and().with().pollDelay(Duration.ofSeconds(1)).await()
                 .atMost(Duration.ofSeconds(30)).until(() -> {
             try {
-                log.info("Getting user: {}", username);
                 userController.getUserByName(APPLICATION_UID, username);
                 return false;
             } catch (NotFoundException exception) {

@@ -2,7 +2,6 @@ package sk.mlobb.authserver.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import sk.mlobb.authserver.model.rest.request.CreateUserRequest;
 import sk.mlobb.authserver.model.rest.request.UpdateUserRequest;
@@ -29,51 +29,34 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping(value = "/applications/{applicationUid}/users",
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<List<User>> getAllUsers(@PathVariable("applicationUid") String applicationUid) {
-        final List<User> users = userService.getAllUsers(applicationUid);
-        if (users.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    @GetMapping(value = "/applications/{applicationUid}/users")
+    public List<User> getAllUsers(@PathVariable("applicationUid") String applicationUid) {
+        return userService.getAllUsers(applicationUid);
     }
 
-    @GetMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<User> getUserByName(@PathVariable("applicationUid") String applicationUid,
+    @GetMapping(value = "/applications/{applicationUid}/users/{identifier}")
+    public User getUserByName(@PathVariable("applicationUid") String applicationUid,
                                               @PathVariable("identifier") String identifier) {
-        return ResponseEntity.ok(userService.getUserByName(applicationUid, identifier));
+        return userService.getUserByName(applicationUid, identifier);
     }
 
-    @PostMapping(value = {"/applications/{applicationUid}/users"},
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<User> createUser(@PathVariable("applicationUid") String applicationUid,
+    @PostMapping(value = "/applications/{applicationUid}/users")
+    @ResponseStatus(HttpStatus.CREATED)
+    public User createUser(@PathVariable("applicationUid") String applicationUid,
                                      @Valid @RequestBody CreateUserRequest request) {
-        log.info("Creating user " + request.getUsername());
-        final User user = userService.createUser(applicationUid, request);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return userService.createUser(applicationUid, request);
     }
 
-    @PutMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<User> updateUserByUsername(@PathVariable("applicationUid") String applicationUid,
+    @PutMapping(value = "/applications/{applicationUid}/users/{identifier}")
+    public User updateUserByUsername(@PathVariable("applicationUid") String applicationUid,
                                      @PathVariable("identifier") String identifier,
                                      @Valid @RequestBody UpdateUserRequest updateUserRequest) {
-            return ResponseEntity.ok(userService.updateUserByUsername(applicationUid, identifier, updateUserRequest,
-                    true));
+            return userService.updateUserByUsername(applicationUid, identifier, updateUserRequest, true);
     }
 
-    @DeleteMapping(value = {"/applications/{applicationUid}/users/{identifier}"},
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public ResponseEntity<Void> deleteUserByName(@PathVariable("applicationUid") String applicationUid,
+    @DeleteMapping(value = "/applications/{applicationUid}/users/{identifier}")
+    public void deleteUserByName(@PathVariable("applicationUid") String applicationUid,
                                            @PathVariable("identifier") String identifier) {
         userService.deleteUserByUsername(applicationUid, identifier);
-        return ResponseEntity.ok().build();
     }
 }

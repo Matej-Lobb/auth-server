@@ -26,7 +26,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     private final DataSource dataSource;
 
     @Autowired
-    public AuthorizationServerConfiguration(AuthenticationManager authenticationManager, DataSource dataSource, CustomUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    public AuthorizationServerConfiguration(AuthenticationManager authenticationManager, DataSource dataSource,
+                                            CustomUserDetailsService userDetailsService,
+                                            PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
