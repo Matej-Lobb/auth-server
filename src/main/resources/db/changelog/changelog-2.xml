@@ -1,6 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
-    <changeSet author="matej (generated)" id="1">
+    <changeSet author="mlobb" id="15">
         <insert tableName="applications">
             <column name="id" valueNumeric="1"/>
             <column name="name" value="Test Application"/>
@@ -22,7 +22,7 @@
             <column name="application_id" valueNumeric="1"/>
         </insert>
     </changeSet>
-    <changeSet author="matej (generated)" id="2">
+    <changeSet author="mlobb" id="16">
         <update tableName="applications">
             <column name="default_role_id" value="2"/>
             <where>id=1</where>
@@ -42,15 +42,15 @@
             <column name="application_id" valueNumeric="1"/>
         </insert>
     </changeSet>
-    <changeSet author="matej (generated)" id="3">
+    <changeSet author="mlobb" id="17">
         <insert tableName="user_roles">
             <column name="id" valueNumeric="1"/>
             <column name="user_id" valueNumeric="1"/>
-            <column name="role_id" valueNumeric="3"/>
+            <column name="role_id" valueNumeric="1"/>
         </insert>
     </changeSet>
 
-    <changeSet author="matej (generated)" id="4">
+    <changeSet author="mlobb" id="18">
         <insert tableName="oauth_client_details">
             <column name="client_id" value="091320fasda123saadaa8259fb484021313123ASDAasd2134asDA2518adea"/>
             <column name="client_secret" value="$2a$10$6.RP85jfZFkrorNWI1ZWZ.Dp4nEUi8z8o7332QHUlbD2pSOfz57Uy"/>
@@ -60,6 +60,8 @@
             <column name="access_token_validity" valueNumeric="3600"/>
             <column name="refresh_token_validity" valueNumeric="2592000"/>
             <column name="autoapprove" valueBoolean="true"/>
+            <column name="web_server_redirect_uri" value="http://localhost:9090/login"/>
+            <column name="resource_ids" value="auth-server"/>
         </insert>
     </changeSet>
 </databaseChangeLog>

@@ -1,0 +1,50 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+    <changeSet author="mlobb" id="19">
+        <createTable tableName="role_privileges">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="detail" type="VARCHAR(255)"/>
+            <column name="privilege_key" type="VARCHAR(255)"/>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="role_privileges"
+                                 constraintName="fk_role_accesses_role_id" referencedColumnNames="id"
+                                 referencedTableName="roles"/>
+    </changeSet>
+
+    <changeSet author="mlobb" id="20">
+        <insert tableName="role_privileges">
+            <column name="privilege_key" value="get-application-details"/>
+            <column name="detail" value="Get details about Application"/>
+            <column name="role_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="role_privileges">
+            <column name="privilege_key" value="get-user"/>
+            <column name="detail" value="Get details about own User"/>
+            <column name="role_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="role_privileges">
+            <column name="privilege_key" value="get-all-user"/>
+            <column name="detail" value="Get details about all User"/>
+            <column name="role_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="role_privileges">
+            <column name="privilege_key" value="update-user"/>
+            <column name="detail" value="Update details about own User"/>
+            <column name="role_id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="role_privileges">
+            <column name="privilege_key" value="delete-user"/>
+            <column name="detail" value="Delete own User"/>
+            <column name="role_id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

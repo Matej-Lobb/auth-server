@@ -75,7 +75,7 @@ public class RawRequestResponseLogger extends OncePerRequestFilter {
         stringBuilder.append("\n").append("Headers: ");
         Collections.list(request.getHeaderNames()).forEach(headerName ->
                 Collections.list(request.getHeaders(headerName)).forEach(headerValue ->
-                        stringBuilder.append(headerName).append(" : ").append(headerValue).append("; ")));
+                        stringBuilder.append(headerName).append(":").append(headerValue).append("; ")));
         return stringBuilder.toString();
     }
 
@@ -103,7 +103,7 @@ public class RawRequestResponseLogger extends OncePerRequestFilter {
                 .append(" ").append("\nHeader: ");
         response.getHeaderNames().forEach(headerName ->
                 response.getHeaders(headerName).forEach(headerValue ->
-                        stringBuilder.append(headerName).append(" : ").append(headerValue).append("; ")));
+                        stringBuilder.append(headerName).append(":").append(headerValue).append("; ")));
         val content = response.getContentAsByteArray();
         stringBuilder.append("\nBody: ");
         if (content.length > 0) {

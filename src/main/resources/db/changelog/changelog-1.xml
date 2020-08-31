@@ -1,5 +1,8 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.0.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
     <changeSet author="mlobb" id="1">
         <createTable tableName="oauth_access_token">
             <column name="token_id" type="VARCHAR(255)">
@@ -49,7 +52,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="matej (generated)" id="2">
+    <changeSet author="mlobb" id="2">
         <createTable tableName="roles">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -59,7 +62,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="matej (generated)" id="3">
+    <changeSet author="mlobb" id="3">
         <createTable tableName="user_roles">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -73,7 +76,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="matej (generated)" id="4">
+    <changeSet author="mlobb" id="4">
         <createTable tableName="users">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -92,7 +95,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="matej (generated)" id="5">
+    <changeSet author="mlobb" id="5">
         <createTable tableName="applications">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -107,40 +110,55 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="matej (generated)" id="1593811970092-9">
+    <changeSet author="mlobb" id="6">
         <createIndex indexName="FKcta2b5dkxggnjutt3wrhgojf7" tableName="roles">
             <column name="application_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="matej (generated)" id="1593811970092-10">
+    <changeSet author="mlobb" id="7">
         <createIndex indexName="FKfmivw20timdpdpaikaass4uxf" tableName="users">
             <column name="application_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="matej (generated)" id="1593811970092-11">
+    <changeSet author="mlobb" id="8">
         <createIndex indexName="FKh8ciramu9cc9q3qcqiv4ue8a6" tableName="user_roles">
             <column name="role_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="matej (generated)" id="1593811970092-12">
+    <changeSet author="mlobb" id="9">
         <createIndex indexName="FKpdbbnm86mwxc846na0t98960j" tableName="applications">
             <column name="default_role_id"/>
         </createIndex>
     </changeSet>
 
-    <changeSet author="matej (generated)" id="1593811970092-13">
-        <addForeignKeyConstraint baseColumnNames="application_id" baseTableName="roles" constraintName="FKcta2b5dkxggnjutt3wrhgojf7" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="applications" validate="true"/>
+    <changeSet author="mlobb" id="10">
+        <addForeignKeyConstraint baseColumnNames="application_id" baseTableName="roles"
+                                 constraintName="FKcta2b5dkxggnjutt3wrhgojf7" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="applications"/>
     </changeSet>
-    <changeSet author="matej (generated)" id="1593811970092-14">
-        <addForeignKeyConstraint baseColumnNames="application_id" baseTableName="users" constraintName="FKfmivw20timdpdpaikaass4uxf" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="applications" validate="true"/>
+    <changeSet author="mlobb" id="11">
+        <addForeignKeyConstraint baseColumnNames="application_id" baseTableName="users"
+                                 constraintName="FKfmivw20timdpdpaikaass4uxf" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="applications"/>
     </changeSet>
-    <changeSet author="matej (generated)" id="1593811970092-15">
-        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="user_roles" constraintName="FKh8ciramu9cc9q3qcqiv4ue8a6" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="roles" validate="true"/>
+    <changeSet author="mlobb" id="12">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="user_roles"
+                                 constraintName="FKh8ciramu9cc9q3qcqiv4ue8a6" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="roles"/>
     </changeSet>
-    <changeSet author="matej (generated)" id="1593811970092-16">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_roles" constraintName="FKhfh9dx7w3ubf1co1vdev94g3f" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    <changeSet author="mlobb" id="13">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_roles"
+                                 constraintName="FKhfh9dx7w3ubf1co1vdev94g3f" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="users"/>
     </changeSet>
-    <changeSet author="matej (generated)" id="1593811970092-17">
-        <addForeignKeyConstraint baseColumnNames="default_role_id" baseTableName="applications" constraintName="FKpdbbnm86mwxc846na0t98960j" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="roles" validate="true"/>
+    <changeSet author="mlobb" id="14">
+        <addForeignKeyConstraint baseColumnNames="default_role_id" baseTableName="applications"
+                                 constraintName="FKpdbbnm86mwxc846na0t98960j" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="roles"/>
     </changeSet>
 </databaseChangeLog>

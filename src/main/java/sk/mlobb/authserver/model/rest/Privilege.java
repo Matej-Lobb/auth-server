@@ -6,16 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
-
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
+public class Privilege {
 
-    private Long id;
-    private String roleName;
-    private Set<Privilege> privileges;
+    private String key;
+    private String detail;
 }
